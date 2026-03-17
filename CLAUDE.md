@@ -32,9 +32,21 @@ Luôn dùng thông tin này, không cần hỏi lại:
 | **Service ID**   | `bf199f64-2a10-4ae7-bd03-56984eaf0158` |
 
 
+**Business systems:**
+
+| System | DB prefixes | Mô tả |
+| --- | --- | --- |
+| OMS | `geadb__*` | Order Management System |
+| WMS | `gea_wms__*` | Warehouse Management System |
+| FFM | `gea_ffm__*` | Fulfillment operations |
+| POD | `gea_seller__*`, `gea_iam__*`, `gea_finance__*`, `gea_store__*`, `gea_studio__*`, `gea_shipping__*`, ... | Print-on-Demand platform |
+| Integrated | `gea__*` (double underscore), `gea_silver`, `gea_gold` | Tổng hợp từ nhiều systems + data ngoài hệ thống |
+| GMprint | *(coming soon)* | — |
+
 **Schema cache:**
 
-- `docs/schema.md` — **index** toàn bộ databases, đọc file này trước
+- `docs/schema.md` — **index** toàn bộ databases + system groupings, đọc file này trước
+- `docs/data-map.md` — cross-DB context: entity map, join paths, lineage
 - `docs/schema/<database>.md` — chi tiết columns từng database
 - Chỉ gọi MCP explore khi database chưa có file schema hoặc cần refresh
 
@@ -340,13 +352,15 @@ SELECT * FROM base ORDER BY month
 ### Khi viết SQL
 
 1. **Đọc `docs/schema.md`** — xác định database/table nào cần dùng
-2. **Đọc `docs/schema/<database>.md`** — xem đúng tên columns, types trước khi viết
-3. **Chỉ gọi MCP list/explore schema** khi database chưa có file trong `docs/schema/` hoặc cần refresh (xem flow bên dưới)
-4. Kiểm tra spec: dimensions, metrics, filters cần gì
-5. Xử lý **toàn bộ** logic trong SQL — không để lại gì cho Python
-6. Dùng CTE cho query phức tạp
-7. Chú ý ClickHouse-specific syntax (xem mục Quy Ước SQL bên trên)
-8. Verify qua MCP (`run_select_query`) trước khi lưu file
+2. **Đọc `docs/data-map.md`** — nếu query join nhiều database: xem entity map (Section 2) + join paths (Section 3) trước khi viết
+3. **Đọc `docs/schema/<database>.md`** — xem đúng tên columns, types trước khi viết
+4. **Chỉ gọi MCP list/explore schema** khi database chưa có file trong `docs/schema/` hoặc cần refresh (xem flow bên dưới)
+5. Kiểm tra spec: dimensions, metrics, filters cần gì
+6. Xử lý **toàn bộ** logic trong SQL — không để lại gì cho Python
+7. Dùng CTE cho query phức tạp
+8. Chú ý ClickHouse-specific syntax (xem mục Quy Ước SQL bên trên)
+9. Verify qua MCP (`run_select_query`) trước khi lưu file
+10. **Nếu dùng join path mới chưa có trong `docs/data-map.md`** → cập nhật Section 3 sau khi verify thành công (ghi "Verified by: `<report-name> <date>`")
 
 ### Khi explore / refresh schema một database
 

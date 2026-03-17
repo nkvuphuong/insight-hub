@@ -20,6 +20,7 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 - [2026-03-16] Restructure: gom báo cáo vào `reports/`, cập nhật CLAUDE.md + README
 - [2026-03-17] Thêm `_templates/schema_template.md`, flow explore schema vào CLAUDE.md
 - [2026-03-17] Restructure CHANGELOG thành index + pointers, cập nhật quy tắc ghi trong CLAUDE.md
+- [2026-03-17] Tạo docs/data-map.md — cross-DB context (domain map, entity map, join paths, lineage)
 
 ### Schema
 - [2026-03-14] Document toàn bộ Silver/Bronze (100% databases) → [docs/schema/](./schema/)

@@ -1,5 +1,11 @@
 # ClickHouse Schema Index
 
+> **Vai trò:** Inventory — trả lời "database/table nào tồn tại, ở đâu, file schema ở đâu".
+> Đây là **điểm vào đầu tiên** khi bắt đầu viết bất kỳ query nào.
+>
+> **Không lưu ở đây:** sub-system meaning, entity mapping, join paths, lineage.
+> → Những thứ đó nằm trong [`docs/data-map.md`](data-map.md).
+
 **Service:** gea-data (`bf199f64-2a10-4ae7-bd03-56984eaf0158`)
 **Last updated:** 2026-03-14
 **Auth:** OAuth (Gmail) qua MCP — không cần credentials
@@ -8,10 +14,28 @@
 
 ## Hướng dẫn sử dụng
 
-- File này là **index** — đọc để biết database nào chứa gì
-- Chi tiết columns → xem file trong `docs/schema/<database>.md`
-- Chỉ explore MCP khi database chưa có file schema hoặc cần refresh
+- Đọc file này **trước tiên** để xác định database/table cần dùng
+- Chi tiết columns → `docs/schema/<database>.md`
+- Cross-DB context (sub-systems, entity map, join paths, lineage) → [`docs/data-map.md`](data-map.md)
+- Chỉ gọi MCP explore khi database chưa có file schema hoặc cần refresh
 - Bỏ qua: `INFORMATION_SCHEMA`, `information_schema`, `system`, `default`, `util`
+
+---
+
+## Business Systems
+
+Gearment chia data thành 4 systems độc lập + 1 Integrated layer:
+
+| System | DB prefixes | Mô tả |
+|---|---|---|
+| **OMS** | `geadb__*` | Order Management System — vòng đời đơn hàng, fulfillment, tracking |
+| **WMS** | `gea_wms__*` | Warehouse Management System |
+| **FFM** | `gea_ffm__*` | Fulfillment operations |
+| **POD** | `gea_seller__*`, `gea_iam__*`, `gea_finance__*`, `gea_store__*`, `gea_studio__*`, `gea_shipping__*`, `gea_notification__*`, `gea_integration__*`, `gea_inventory__*`, `gea_oms_integration__*` | Print-on-Demand platform |
+| **Integrated** | `gea__*` (double underscore), `gea_silver`, `gea_gold`, `gea_bi_dw` | Tổng hợp từ nhiều systems + data ngoài hệ thống |
+| **GMprint** | *(coming soon)* | — |
+
+> Context đầy đủ (entity map, join paths, lineage) → [`docs/data-map.md`](data-map.md)
 
 ---
 
@@ -101,17 +125,6 @@ Khi query bronze: **luôn dùng bản không có suffix** + thêm `FINAL` nếu 
 
 Các giá trị tiền tệ (amount, fee, price) trong `gea_finance__bronze` lưu dạng **cents** (Int64) — cần chia 100 khi hiển thị.
 
-### Key tables để báo cáo
+### Entity map & Key tables
 
-| Báo cáo cần | Database | Table |
-|---|---|---|
-| Orders, revenue | `geadb__bronze` | `nh_order`, `nh_order_extra` |
-| Order weight | `geadb__silver` | `fact_order_weight` |
-| Shipping zone | `gea_gold` | `order_shipping_zone` |
-| NextApp metrics | `gea_gold` | `nextapp_order_metrics` |
-| USPS rates | `gea_gold` | `v_easypost_rate_usps` |
-| Seller/store orders | `gea_seller__bronze` | `sc_order`, `sc_order_line_item` |
-| USPS tracking | `gea__bronze` | `usps_tracking_event` |
-| Finance/wallet | `gea_finance__bronze` | `fin_wallet_transaction`, `fin_team_transaction` |
-| User/team IAM | `gea_iam__bronze` | `iam_user`, `iam_team` |
-| Studio media | `gea_studio__bronze` | `stu_media` |
+> Xem [`docs/data-map.md` — Section 2](data-map.md#section-2--business-entity--canonical-table): Bronze canonical → Silver enriched → Gold metric cho từng business entity.
