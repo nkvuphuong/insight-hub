@@ -45,14 +45,14 @@
 | `platform` | Nullable(String) | |
 | `reference_id` | Nullable(String) | |
 | `import_id` | Nullable(String) | |
-| `tracking_no` | Nullable(String) | |
-| `label_url` | Nullable(String) | |
+| `tracking_no` | Nullable(String) | tracking number per fulfillment package; 1 đơn có nhiều tracking numbers |
+| `label_url` | Nullable(String) | label URL per fulfillment package (tương tự tracking_no) |
 | `processing_status` | Nullable(String) | |
 | `status` | Nullable(String) | |
 | `order_total` | Nullable(Int64) | cents |
-| `surcharge_fee` | Nullable(Int64) | |
-| `shipping_fee` | Nullable(Int64) | |
-| `handle_fee` | Nullable(Int64) | |
+| `surcharge_fee` | Nullable(Int64) | cents |
+| `shipping_fee` | Nullable(Int64) | cents |
+| `handle_fee` | Nullable(Int64) | cents |
 | `is_cancelled` | Nullable(Bool) | |
 | `shipped_at` | Nullable(DateTime64(6,'UTC')) | |
 | `warehouse_received_at` | Nullable(DateTime64(6,'UTC')) | |
@@ -83,7 +83,7 @@
 | `line1` | Nullable(String) | |
 | `line2` | Nullable(String) | |
 | `locality` | Nullable(String) | City |
-| `admin_area` | Nullable(String) | State/Province |
+| `admin_area` | Nullable(String) | State/Province (division_level_1); phục vụ nhiều thị trường |
 | `region_code` | Nullable(String) | |
 | `region` | Nullable(String) | |
 | `country_code` | Nullable(String) | |
@@ -134,7 +134,7 @@
 | `platform` | Nullable(String) | |
 | `package_id` | Nullable(String) | |
 | `warehouse_code` | Nullable(String) | |
-| `vendor_id` | Nullable(String) | |
+| `vendor_id` | Nullable(String) | WMS vendor ID (currently GearmentWMS) |
 | `outbound_code` | Nullable(String) | WMS outbound code |
 | `inbound_plan_id` | Nullable(String) | |
 | `tracking_no` | Nullable(String) | |
@@ -198,13 +198,13 @@
 | `sku` | Nullable(String) | |
 | `name` | Nullable(String) | |
 | `description` | Nullable(String) | |
-| `weight` | Nullable(Decimal(38,18)) | |
-| `width` | Nullable(Decimal(38,18)) | |
-| `height` | Nullable(Decimal(38,18)) | |
-| `length` | Nullable(Decimal(38,18)) | |
+| `weight` | Nullable(Decimal(38,18)) | Physical weight |
+| `width` | Nullable(Decimal(38,18)) | Physical dimension |
+| `height` | Nullable(Decimal(38,18)) | Physical dimension |
+| `length` | Nullable(Decimal(38,18)) | Physical dimension |
 | `status` | Nullable(String) | |
 | `wms_status` | Nullable(String) | |
-| `hs_code` | Nullable(String) | |
+| `hs_code` | Nullable(String) | Mã mô tả sản phẩm khi qua hải quan |
 | `option1/2/3/4/5` | Nullable(String) | |
 | `is_warehouse_dimension_measured` | Nullable(Bool) | |
 | `created_at` | DateTime64(6,'UTC') | |

@@ -259,10 +259,10 @@
 | `client_code` | Nullable(String) | |
 | `client_sp_code` | Nullable(String) | |
 | `client_carton_code` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | draft; awaiting_receipt; received; closed; cancelled |
 | `received_warehouse_code` | Nullable(String) | |
 | `total_parcels` | Nullable(Int32) | |
-| `received_parcels` | Nullable(Int32) | |
+| `received_parcels` | Nullable(Int32) | default: 0 |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
 | `received_at` | Nullable(String) | |
@@ -351,10 +351,10 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | `id` | Int64 | PK |
-| `code` | Nullable(String) | |
+| `code` | Nullable(String) | Format: RP12345678 |
 | `client_sp_code` | Nullable(String) | |
 | `client_code` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | draft; awaiting_receipt; partially_received; closed; cancelled |
 | `from_address_1` | Nullable(String) | |
 | `from_address_2` | Nullable(String) | |
 | `from_country` | Nullable(String) | |
@@ -372,7 +372,7 @@
 | `tracking_carrier` | Nullable(String) | |
 | `shipped_at` | Nullable(String) | |
 | `received_warehouse_code` | Nullable(String) | |
-| `is_labeled_by_warehouse` | Nullable(Bool) | warehouse có tự in label không |
+| `is_labeled_by_warehouse` | Nullable(Bool) | warehouse có tự in label không; default: false |
 | `total_cartons` | Nullable(Int32) | |
 | `received_cartons` | Nullable(Int32) | |
 | `created_at` | Nullable(String) | |
@@ -552,7 +552,7 @@
 | `client_code` | Nullable(String) | |
 | `client_sku` | Nullable(String) | SKU phía client |
 | `good_quantity` | Nullable(Int32) | total good condition |
-| `good_available_quantity` | Nullable(Int32) | available good condition |
+| `good_available_quantity` | Nullable(Int32) | available good condition; = fulfillable_stock |
 | `good_allocated_quantity` | Nullable(Int32) | allocated good condition |
 | `damaged_quantity` | Nullable(Int32) | total damaged condition |
 | `damaged_available_quantity` | Nullable(Int32) | available damaged condition |
@@ -584,11 +584,11 @@
 | `client_code` | Nullable(String) | |
 | `client_sku` | Nullable(String) | SKU phía client |
 | `cluster_code` | Nullable(String) | |
-| `condition_type` | Nullable(String) | good / damaged / expired / lost |
+| `condition_type` | Nullable(String) | good; damaged; lost; expired |
 | `quantity` | Nullable(Int32) | |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
-| `cluster_system_code` | Nullable(String) | |
+| `cluster_system_code` | Nullable(String) | [system_sku]-[warehouse_code]-[cluster_code] |
 | `_processed_at` | DateTime64(3, 'UTC') | CDC ingest time |
 | `_action` | String | insert / update / delete |
 | `_timestamp` | DateTime64(3, 'UTC') | CDC event time |
@@ -604,7 +604,7 @@
 | `id` | Int64 | PK |
 | `system_sku` | Nullable(String) | SKU hệ thống WMS |
 | `warehouse_code` | Nullable(String) | |
-| `code` | Nullable(String) | |
+| `code` | Nullable(String) | EXP[YYYY][MM][DD] (expiry); SRN[serial_number] (serial); UNKNOWN (unmanaged) |
 | `inventory_id` | Int64 | |
 | `client_code` | Nullable(String) | |
 | `client_sku` | Nullable(String) | SKU phía client |
@@ -618,12 +618,12 @@
 | `expired_available_quantity` | Nullable(Int32) | available expired condition |
 | `expired_allocated_quantity` | Nullable(Int32) | allocated expired condition |
 | `lost_quantity` | Nullable(Int32) | lost stock |
-| `fulfillable_expired_at` | Nullable(String) | |
+| `fulfillable_expired_at` | Nullable(String) | Outbound threshold — hạn tối thiểu để xuất kho |
 | `expired_at` | Nullable(String) | |
 | `serial_number` | Nullable(String) | |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
-| `system_code` | Nullable(String) | |
+| `system_code` | Nullable(String) | [system_sku]-[warehouse_code]-[cluster_code] |
 | `_processed_at` | DateTime64(3, 'UTC') | CDC ingest time |
 | `_action` | String | insert / update / delete |
 | `_timestamp` | DateTime64(3, 'UTC') | CDC event time |
@@ -727,12 +727,12 @@
 | `cluster_expired_at` | Nullable(String) | |
 | `cluster_serial_number` | Nullable(String) | |
 | `quantity` | Nullable(Int32) | |
-| `condition_type` | Nullable(String) | good / damaged / expired / lost |
+| `condition_type` | Nullable(String) | good; damaged; lost; expired |
 | `outbound_request_code` | Nullable(String) | |
 | `warehouse_code` | Nullable(String) | |
 | `system_sku` | Nullable(String) | SKU hệ thống WMS |
 | `bin_code` | Nullable(String) | |
-| `cluster_system_code` | Nullable(String) | |
+| `cluster_system_code` | Nullable(String) | [system_sku]-[warehouse_code]-[cluster_code] |
 | `_processed_at` | DateTime64(3, 'UTC') | CDC ingest time |
 | `_action` | String | insert / update / delete |
 | `_timestamp` | DateTime64(3, 'UTC') | CDC event time |
@@ -752,10 +752,10 @@
 | `client_code` | Nullable(String) | |
 | `client_sku` | Nullable(String) | SKU phía client |
 | `system_sku` | Nullable(String) | SKU hệ thống WMS |
-| `client_product_name` | Nullable(String) | |
+| `client_product_name` | Nullable(String) | Denorm product name from client |
 | `quantity` | Nullable(Int32) | |
-| `unit_price` | Nullable(Int64) | đơn vị không rõ (có thể cents hoặc dollars — cần xác nhận) |
-| `allocation_status` | Nullable(String) | trạng thái allocation của line item |
+| `unit_price` | Nullable(Int64) | cents (use subunit) |
+| `allocation_status` | Nullable(String) | pending; allocated; unallocatable; deallocated |
 | `packed_quantity` | Nullable(Int32) | |
 | `_processed_at` | DateTime64(3, 'UTC') | CDC ingest time |
 | `_action` | String | insert / update / delete |
@@ -771,21 +771,21 @@
 |---|---|---|
 | `id` | Int64 | PK |
 | `client_code` | Nullable(String) | |
-| `client_platform_code` | Nullable(String) | |
+| `client_platform_code` | Nullable(String) | Channel platform code |
 | `warehouse_code` | Nullable(String) | |
-| `code` | Nullable(String) | |
-| `client_or_code` | Nullable(String) | outbound request code từ phía client |
-| `or_type` | Nullable(String) | loại outbound request |
+| `code` | Nullable(String) | OR code, format: OR12345678 |
+| `client_or_code` | Nullable(String) | POD order code |
+| `or_type` | Nullable(String) | production=sản xuất; cross_docking; transfer |
 | `created_at` | Nullable(String) | |
 | `inserted_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | production: allocating_stock; allocated_stock; picking; in_production; packing; packed; out_of_stock; cancelled; on_hold; handing_over; shipped; completed; reallocating_stock \| cross_docking: awaiting_confirmation; received; packed; shipped; handing_over; on_hold; cancelled |
 | `note` | Nullable(String) | |
-| `total_amount` | Nullable(Int64) | |
+| `total_amount` | Nullable(Int64) | cents (use subunit) |
 | `cancel_reason` | Nullable(String) | |
 | `tracking_code` | Nullable(String) | |
 | `shipping_label_url` | Nullable(String) | |
-| `previous_status` | Nullable(String) | |
+| `previous_status` | Nullable(String) | Lưu status trước đó, dùng cho hold/unhold |
 | `workorder_code` | Nullable(String) | work order code |
 | `total_item_quantity` | Nullable(Int32) | |
 | `total_item_packed_quantity` | Nullable(Int32) | |
@@ -794,8 +794,8 @@
 | `tracking_url` | Nullable(String) | |
 | `client_ref_code` | Nullable(String) | |
 | `shipped_at` | Nullable(String) | |
-| `in_charge_processor_id` | Nullable(Int64) | |
-| `is_labeled_by_warehouse` | Bool | warehouse có tự in label không |
+| `in_charge_processor_id` | Nullable(Int64) | ID người xử lý |
+| `is_labeled_by_warehouse` | Bool | warehouse có tự in label không; default: false |
 | `client_shipment_carton_code` | Nullable(String) | |
 | `sp_code` | Nullable(String) | shipment plan code |
 | `client_sp_code` | Nullable(String) | |
@@ -865,12 +865,12 @@
 | `received_good_quantity` | Nullable(Int32) | |
 | `received_damaged_quantity` | Nullable(Int32) | |
 | `received_expired_quantity` | Nullable(Int32) | |
-| `unit_price` | Nullable(Int64) | đơn vị không rõ (có thể cents hoặc dollars — cần xác nhận) |
-| `amount` | Nullable(Int64) | đơn vị không rõ (có thể cents hoặc dollars — cần xác nhận) |
+| `unit_price` | Nullable(Int64) | cents (use subunit) |
+| `amount` | Nullable(Int64) | cents (use subunit) |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
 | `awaiting_receipt_quantity` | Nullable(Int32) | |
-| `received_quantity` | Nullable(Int32) | |
+| `received_quantity` | Nullable(Int32) | Virtual: received_good_quantity + received_damaged_quantity + received_expired_quantity |
 | `_processed_at` | DateTime64(3, 'UTC') | CDC ingest time |
 | `_action` | String | insert / update / delete |
 | `_timestamp` | DateTime64(3, 'UTC') | CDC event time |
@@ -912,12 +912,12 @@
 | `client_sku` | Nullable(String) | SKU phía client |
 | `system_sku` | Nullable(String) | SKU hệ thống WMS |
 | `quantity` | Nullable(Int32) | |
-| `condition_type` | Nullable(String) | good / damaged / expired / lost |
+| `condition_type` | Nullable(String) | good; damaged; expired; residual |
 | `import_tax_rate` | Nullable(Float64) | |
 | `received_quantity` | Nullable(Int32) | |
-| `unit_price` | Nullable(Int64) | đơn vị không rõ (có thể cents hoặc dollars — cần xác nhận) |
-| `amount` | Nullable(Int64) | đơn vị không rõ (có thể cents hoặc dollars — cần xác nhận) |
-| `is_warehouse_receivable` | Nullable(Bool) | |
+| `unit_price` | Nullable(Int64) | cents (use subunit) |
+| `amount` | Nullable(Int64) | Virtual field: ceil((unit_price * quantity) * (1 + import_tax_rate)); cents |
+| `is_warehouse_receivable` | Nullable(Bool) | default: true |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
 | `purchase_order_shipment_item_id` | Nullable(Int64) | |
@@ -939,17 +939,17 @@
 | `ref_code` | Nullable(String) | |
 | `invoice_number` | Nullable(String) | |
 | `tracking_code` | Nullable(String) | |
-| `tracking_carrier` | Nullable(String) | |
+| `tracking_carrier` | Nullable(String) | e.g. USPS, UPS, DHL |
 | `tracking_status` | Nullable(String) | |
-| `shipping_method` | Nullable(String) | |
+| `shipping_method` | Nullable(String) | e.g. sea, train |
 | `container_number` | Nullable(String) | |
 | `estimated_received_at` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | open; awaiting_receipt; received; confirmed; cancelled |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
 | `received_at` | Nullable(String) | |
 | `note` | Nullable(String) | |
-| `code` | Nullable(String) | |
+| `code` | Nullable(String) | Format: [PO code]-[number] |
 | `warehouse_code` | Nullable(String) | |
 | `client_vendor_id` | Nullable(Int64) | |
 | `client_vendor_code` | Nullable(String) | |
@@ -968,13 +968,13 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | `id` | Int64 | PK |
-| `code` | Nullable(String) | |
+| `code` | Nullable(String) | PO code, format: PO12345678 |
 | `client_po_code` | Nullable(String) | |
 | `ir_code` | Nullable(String) | |
 | `created_at` | Nullable(String) | |
 | `inserted_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | draft; awaiting_approval; approved; awaiting_receipt; partially_received; completed; rejected; cancelled |
 | `client_code` | Nullable(String) | |
 | `client_vendor_code` | Nullable(String) | |
 | `team_code` | Nullable(String) | |
@@ -987,9 +987,9 @@
 | `destination_division_level_2` | Nullable(String) | |
 | `destination_zip_code` | Nullable(String) | |
 | `estimated_received_at` | Nullable(String) | |
-| `subtotal_amount` | Nullable(Int64) | |
-| `discount_amount` | Nullable(Int64) | |
-| `total_amount` | Nullable(Int64) | |
+| `subtotal_amount` | Nullable(Int64) | cents (use subunit) |
+| `discount_amount` | Nullable(Int64) | cents (use subunit) |
+| `total_amount` | Nullable(Int64) | cents (use subunit) |
 | `total_quantity` | Nullable(Int32) | |
 | `total_received_quantity` | Nullable(Int32) | |
 | `note` | Nullable(String) | |
@@ -1227,14 +1227,14 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | `id` | Int64 | PK |
-| `code` | Nullable(String) | |
+| `code` | Nullable(String) | TF code, format: TF12345678 |
 | `client_id` | Nullable(Int64) | |
 | `client_code` | Nullable(String) | |
 | `source_warehouse_id` | Nullable(Int64) | |
 | `source_warehouse_code` | Nullable(String) | |
 | `destination_warehouse_id` | Nullable(Int64) | |
 | `destination_warehouse_code` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | draft; awaiting_approval; approved; awaiting_transfer; partially_transfered; transfered; cancelled |
 | `note` | Nullable(String) | |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
@@ -1433,13 +1433,13 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | `id` | Int64 | PK |
-| `code` | Nullable(String) | |
+| `code` | Nullable(String) | WO code, format: WO12345678 |
 | `warehouse_code` | Nullable(String) | |
 | `total_item_quantity` | Nullable(Int32) | |
 | `total_outbound_requests` | Nullable(Int32) | |
 | `created_at` | Nullable(String) | |
 | `updated_at` | Nullable(String) | |
-| `status` | Nullable(String) | |
+| `status` | Nullable(String) | new; ready_for_processing; processed |
 | `item_picking_list_url` | Nullable(String) | |
 | `outbound_request_picking_list_url` | Nullable(String) | |
 | `outbound_request_list_url` | Nullable(String) | |
