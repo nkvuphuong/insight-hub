@@ -129,7 +129,7 @@ Claude làm:
 Claude làm:
 
 1. Cập nhật `spec.md`: status → `production`, điền Metabase link
-2. Ghi `changelog.md` + `docs/changelogs/CHANGELOG.md`
+2. Ghi `changelog.md` + `docs/CHANGELOG.md`
 3. Cập nhật bảng "Danh Sách Báo Cáo" trong `CLAUDE.md`
 
 ---
@@ -230,8 +230,7 @@ reports/
 │   │   ├── gea_integration__bronze.md
 │   │   ├── gea_inventory__bronze.md
 │   │   └── gea_oms_integration__bronze.md
-│   └── changelogs/
-│       └── CHANGELOG.md           # Changelog tổng hợp toàn dự án
+│   └── CHANGELOG.md               # Changelog tổng hợp toàn dự án
 ├── _templates/
 │   ├── spec_template.md           # Template đặc tả báo cáo
 │   └── poc_template.ipynb         # Template notebook POC
@@ -297,12 +296,37 @@ SELECT * FROM base ORDER BY month
 
 ## Hướng Dẫn Claude
 
+### Quy tắc ghi CHANGELOG (áp dụng cho mọi loại thay đổi)
+
+**Sau mỗi session làm việc, luôn ghi vào `docs/CHANGELOG.md`** — bất kể là schema, setup, hay báo cáo.
+
+`docs/CHANGELOG.md` là **index** — mỗi entry = 1 dòng tóm tắt ≤ 15 từ + pointer đến detail (nếu có). Detail nằm ở file sẵn có, không tạo file mới.
+
+| Scope | Detail nằm ở | Có pointer không |
+|---|---|---|
+| `[setup]` | Không có file riêng — ghi inline ngắn là đủ | Không |
+| `[schema]` | `docs/schema/<db>.md` | Có |
+| `[<report>]` | `reports/<name>/changelog.md` | Có |
+
+**Ví dụ:**
+```
+### Setup
+- [2026-03-17] Thêm schema_template.md, flow explore schema vào CLAUDE.md
+
+### Schema
+- [2026-03-17] gea_wms__bronze: explore 60 tables, WMS domain (mới) → [gea_wms__bronze.md](../schema/gea_wms__bronze.md)
+
+### Reports
+- [2026-03-13..16] order-performance: spec → poc-done (v0.1→v0.18) → [changelog](../../reports/order-performance/changelog.md)
+```
+
 ### Khi làm việc với báo cáo hiện có
 
 1. Đọc `reports/<report-name>/spec.md` — xác định status hiện tại, làm việc đúng giai đoạn
 2. Không nhảy cóc giai đoạn — spec chưa confirmed thì không viết SQL
 3. Chạy SQL qua MCP để verify trước khi lưu vào `queries/`
 4. Ghi lại mọi thay đổi vào `reports/<report-name>/changelog.md` với đúng version
+5. Ghi entry tương ứng vào `docs/CHANGELOG.md`
 
 ### Khi tạo báo cáo mới
 
@@ -360,7 +384,9 @@ ORDER BY total_rows DESC
 
 Sửa `docs/schema.md`: cập nhật dòng của database đó (tables count, link file, status → Done).
 
-**Lưu ý format:** xem hướng dẫn trong `_templates/schema_template.md`.
+**Bước 5 — Ghi CHANGELOG**
+
+Thêm 1 dòng index vào section `### Schema` trong `docs/CHANGELOG.md` — tóm tắt ≤ 15 từ + pointer đến file schema vừa tạo/cập nhật. Xem quy tắc đầy đủ ở mục "Quy tắc ghi CHANGELOG".
 
 ### Khi tạo visualization (Python)
 
