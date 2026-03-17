@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "clickhouse": {
+      "type": "http",
+      "url": "https://mcp.clickhouse.cloud/mcp",
+      "headers": {
+        "x-clickhouse-user": "${CLICKHOUSE_USER}",
+        "x-clickhouse-password": "${CLICKHOUSE_PASSWORD}"
+      }
+    }
+  }
+}
