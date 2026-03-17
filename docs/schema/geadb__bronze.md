@@ -729,90 +729,90 @@
 | ord_name | Nullable(String) | order name |
 | cus_id | Int64 | FK → nh_customer (seller ID) |
 | ord_key | Nullable(String) | |
-| ord_promotion | Decimal(20,2) | |
+| ord_promotion | Decimal(20,2) | Giá tiến promotion |
 | ord_discount | Float32 | |
-| ord_fee_shipping | Float32 | shipping fee |
-| ord_type_discount | Int16 | |
-| ord_is_vat | Nullable(Int16) | |
+| ord_fee_shipping | Float32 | Phí vận chuyển |
+| ord_type_discount | Int16 | -1=không dùng discount; 0=discount; 1=free shipping |
+| ord_is_vat | Nullable(Int16) | 0=No; 1=Yes |
 | ord_coupon | Nullable(String) | |
-| ord_vat | Nullable(Float32) | |
-| ord_vat_total | Float32 | |
+| ord_vat | Nullable(Float32) | Thuế (%) |
+| ord_vat_total | Float32 | Tổng tiền thuế |
 | ord_handle_fee | Decimal(20,2) | |
-| ord_payment_status | Nullable(Int16) | payment status code |
-| ord_payment_method | Int16 | payment method code |
+| ord_payment_status | Nullable(Int16) | 0=pending; 3=refund (enum bị truncate trong DDL) |
+| ord_payment_method | Int16 | 1=Stripe; 2=Paypal; 3=Wallet |
 | ord_time | DateTime | order created time |
-| ord_datetime | Int64 | unix created |
+| ord_datetime | Int64 | Unix timestamp tại 00:00:00 của ngày tạo đơn |
 | ord_payment_datetime | Int64 | unix payment time ⭐ |
 | ord_update_time | Int64 | |
-| ord_status | Int16 | order status code ⭐ |
+| ord_status | Int16 | 0=pending; 1=processing; 2=done; 3=cancelled |
 | ord_deleted | Int16 | soft delete flag |
 | ord_archived | Int16 | |
 | ord_note | Nullable(String) | |
 | ord_total | Float32 | order total ⭐ |
-| ord_subtotal | Float32 | |
+| ord_subtotal | Float32 | Tổng tiền = sl × đơn giá |
 | ord_profit | Decimal(20,2) | profit ⭐ |
-| ord_total_discount | Decimal(20,2) | |
-| ord_discount_info | Nullable(String) | |
+| ord_total_discount | Decimal(20,2) | Value off discount (final calculated) |
+| ord_discount_info | Nullable(String) | Thông tin giá discount |
 | ord_discount_item_id | Int64 | |
-| ord_shipping_location | Nullable(Int16) | |
-| ord_shipping_method | Int16 | |
-| ord_cus_email | String | end customer email |
-| ord_cus_name | Nullable(String) | |
+| ord_shipping_location | Nullable(Int16) | 0=USA; 1=international |
+| ord_shipping_method | Int16 | 0=Standard; 1=Express |
+| ord_cus_email | String | Email end customer |
+| ord_cus_name | Nullable(String) | Tên end customer |
 | ord_cus_company | Nullable(String) | |
 | ord_cus_phonenumber | Nullable(String) | |
-| ord_cus_address1 | String | |
-| ord_cus_address2 | String | |
-| ord_cus_country | Int64 | FK → nh_country |
-| ord_cus_city | String | |
-| ord_cus_province | String | |
-| ord_cus_state | Int64 | FK → nh_state |
-| ord_cus_postal_code | String | |
-| ord_zipcode_billing | String | |
+| ord_cus_address1 | String | Địa chỉ 1 |
+| ord_cus_address2 | String | Địa chỉ 2 |
+| ord_cus_country | Int64 | FK → nh_country (id quốc gia) |
+| ord_cus_city | String | Tên thành phố |
+| ord_cus_province | String | Tên tỉnh thành |
+| ord_cus_state | Int64 | FK → nh_state (State ID) |
+| ord_cus_postal_code | String | Mã bưu điện |
+| ord_zipcode_billing | String | Mã zipcode của order |
 | cam_id | Int64 | FK → nh_campaigns |
-| transaction_id | Nullable(Int64) | FK → nh_transaction |
-| transaction_refund | Int64 | |
-| transaction_profit | Int64 | |
+| transaction_id | Nullable(Int64) | FK → nh_transaction (mã giao dịch) |
+| transaction_refund | Int64 | ID transaction refund |
+| transaction_profit | Int64 | Transaction profit |
 | ord_ip | String | |
-| ord_tracking_status | Int16 | |
+| ord_tracking_status | Int16 | 1=Xác nhận; 2=Đang in; 3=Đã vận chuyển; 4=Giao hàng |
 | promotion_id | Int64 | |
 | store_id | Int64 | FK → nh_store_integrations |
-| marketplace_id | Nullable(String) | marketplace order ID |
-| is_approve | Int16 | approved flag |
-| ord_type_print | Int16 | |
-| ord_status_custom | Nullable(Int16) | custom status ⭐ |
+| marketplace_id | Nullable(String) | Amazon marketplace_id |
+| is_approve | Int16 | 0=not approved; 1=approved (hiện trên ACP order) |
+| ord_type_print | Int16 | 1=screen print; 2=DTG |
+| ord_status_custom | Nullable(Int16) | Custom status ⭐: 0=Pending; 10=Back-order; 13=In Production; 14=Picked; 15=Printed; 21=Completed; 22=Shipped; 23=Fulfilled; 31=Cancelled; 33=Failed |
 | ord_list | Nullable(String) | |
 | asin_list | Nullable(String) | |
-| ord_tag | Int16 | |
-| parent_id | Int64 | parent order (split orders) |
-| ord_time_unlock | Int64 | |
-| ord_workorder_items | Nullable(Int64) | |
-| is_import | Int16 | imported order flag |
-| online_id | Nullable(String) | platform order ID |
+| ord_tag | Int16 | 0=no tag; 1=back-order; 2=CS; 3=on-hold; 4=3rd_printing; 5=production-hold; 6=Picking |
+| parent_id | Int64 | FK → nh_order (order id cha khi split) |
+| ord_time_unlock | Int64 | Check time unlock để lock lại |
+| ord_workorder_items | Nullable(Int64) | Số lượng items khả dụng để tạo workorder |
+| is_import | Int16 | 0=no; 1=imported order |
+| online_id | Nullable(String) | ord_id của order import từ platform |
 | online_name | Nullable(String) | platform order name |
-| online_reference | Nullable(String) | |
-| purchasedate_online | Int64 | |
-| res_content | Nullable(String) | |
-| platform_id | Int16 | FK → platform lookup |
-| method_insert | Int16 | insert method |
-| method_insert_subtype | Int16 | |
-| email_upsell | Int64 | |
-| ord_locked | Int16 | |
-| verify_address | Int16 | |
-| ord_time_approve | Int64 | unix approve time |
-| check_profit | Int16 | |
-| ord_id_3rd | Nullable(String) | 3rd party order ID |
-| is_check_stock | Int16 | |
-| ord_priority | Int16 | |
-| ord_type_error | Int16 | |
-| ord_is_single | Int16 | |
-| work_id | Int64 | |
-| ord_print_provider | Int16 | print provider code |
-| multiple_type | Int16 | |
-| ord_is_split | Nullable(Int16) | split order flag |
-| is_issue | Int16 | |
+| online_reference | Nullable(String) | Order ID 3rd party (Shopify...) |
+| purchasedate_online | Int64 | Date created order online (unix) |
+| res_content | Nullable(String) | Response content từ third party |
+| platform_id | Int16 | 1=Shopify; 2=API; 3=Amazon; 4=clone; 5=Shopbase; 6=TheTeeworld; 7=Manual; 8=OrderDesk; 9=FBA; 16=Platform Gearment |
+| method_insert | Int16 | 0=sync; 1=import |
+| method_insert_subtype | Int16 | 0=file default; 2=wordpress; 3=Etsy; 4=Presta shop; 5=eBay |
+| email_upsell | Int64 | ID email upsell |
+| ord_locked | Int16 | 0=chưa lock; 1=đã lock |
+| verify_address | Int16 | 0=chưa verify; 1=đã verify |
+| ord_time_approve | Int64 | Thời gian duyệt đơn hàng (unix) |
+| check_profit | Int16 | Đánh dấu đã tính profit |
+| ord_id_3rd | Nullable(String) | Mã order bên printing thứ 3 |
+| is_check_stock | Int16 | 0=chưa check; 1=đã check có hàng; 2=có hàng nhưng chưa insert variant stock |
+| ord_priority | Int16 | 0=normal; 1=priority; 2=Highest (rush) |
+| ord_type_error | Int16 | 0=no error; 1=Wrong t-shirt; 2=Wrong size; 3=Wrong print; 4=Bad print; 7=Lost package; 8=Tracking not work; 9=Partial refund; 10=Full refund; 11=re-buy label; 12=Damaged |
+| ord_is_single | Int16 | 0=chưa xác định; 1=single item; 2=multiple items |
+| work_id | Int64 | Workorder ID |
+| ord_print_provider | Int16 | 1=dreamjunction; 2=scalable |
+| multiple_type | Int16 | 0=chỉ có t-shirt; 1=có loại sản phẩm khác |
+| ord_is_split | Nullable(Int16) | Đánh dấu đơn hàng đã tách |
+| is_issue | Int16 | Đánh dấu đơn hàng có issue |
 | ord_issue_status | Int16 | |
 | ord_issue_id | Int64 | |
-| ord_temp_error | Int16 | |
+| ord_temp_error | Int16 | Loại lỗi tạm thời — dùng thông báo cho seller tại listing order |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -936,77 +936,77 @@
 | ordi_id | Int64 | PK |
 | ord_id | Int64 | FK → nh_order ⭐ |
 | ordi_name | Nullable(String) | item name |
-| transaction_id | Int64 | |
+| transaction_id | Int64 | FK → nh_transaction (mã giao dịch) |
 | pcam_id | Int64 | FK → nh_product_campaigns |
 | ordi_size | Int64 | size ID |
 | ordi_color | Int64 | color ID |
-| material_id | Int64 | FK → nh_material |
+| material_id | Int64 | FK → nh_material (Material ID) |
 | print_type | Int64 | FK → nh_print_type |
 | ordi_price | Float32 | item price ⭐ |
-| ordi_price_original | Float32 | original price |
-| price_extra | Float32 | extra price |
-| ordi_quantity | Int64 | quantity ⭐ |
+| ordi_price_original | Float32 | Giá gốc — chưa tính discount |
+| price_extra | Float32 | Giá cộng thêm (ví dụ: in 2 mặt) |
+| ordi_quantity | Int64 | Số lượng ⭐ |
 | ordi_fee_shipping | Float32 | item shipping fee |
-| ordi_base_cost | Nullable(Float32) | base cost |
-| ordi_base_cost_synced_at | Nullable(Int64) | |
-| ordi_printing_cost | Nullable(Float32) | printing cost |
+| ordi_base_cost | Nullable(Float32) | = nh_variants.var_cost_price |
+| ordi_base_cost_synced_at | Nullable(Int64) | Thời điểm sync giá từ bảng variants (unix) |
+| ordi_printing_cost | Nullable(Float32) | Dùng cho business account |
 | ordi_vat_total | Float32 | |
 | ordi_handle_fee | Decimal(20,2) | |
-| ordi_subtotal | Float32 | |
+| ordi_subtotal | Float32 | Tổng tiền = ordi_quantity × ordi_price |
 | ordi_total | Float32 | item total |
-| ordi_profit | Float32 | item profit ⭐ |
+| ordi_profit | Float32 | Lợi nhuận ⭐ |
 | ordi_deleted | Int16 | soft delete |
-| bin_id | Int64 | |
-| work_id | Int64 | |
-| po_id | Int64 | production order ID |
+| bin_id | Int64 | BIN Order ID |
+| work_id | Int64 | Work Order ID |
+| po_id | Int64 | Purchase Order ID |
 | ordi_content | Nullable(String) | |
 | ordi_content_temp | Nullable(String) | |
 | ordi_content_res | Nullable(String) | |
 | ordi_discount_info | Nullable(String) | |
 | discount_item_id | Int64 | |
 | cam_id | Int64 | FK → nh_campaigns |
-| cus_id | Int64 | FK → nh_customer |
+| cus_id | Int64 | FK → nh_customer (id reseller) |
 | ordi_time | DateTime | item created time |
 | ordi_time_update | Int64 | |
 | ordi_datetime | Int64 | |
 | ordi_payment_datetime | Int64 | unix payment time |
 | ordi_quantity_printed | Int16 | qty already printed |
-| exp_id | Int64 | FK → nh_exproduct ⭐ |
+| exp_id | Int64 | FK → nh_exproduct — id sản phẩm mẫu ⭐ |
 | varian_id | Int64 | FK → nh_variants |
-| ordi_status | Int16 | item status ⭐ |
+| ordi_status | Int16 | Item status ⭐: 0=pending; 1=in production; 2=pickup; 3=printed; 4=completed; 5=failed; 6=picking |
 | store_id | Int64 | FK → nh_store_integrations |
 | print_id | Int64 | |
 | shipping_id | Int64 | |
-| send_print | Int16 | |
-| ordi_quantity_error | Int16 | |
-| ordi_quantity_adjust | Int64 | |
-| side_print | Nullable(String) | front/back/etc. |
-| is_import | Int16 | |
-| design_path | Nullable(String) | design file path |
-| design_path_back | Nullable(String) | |
-| design_front_name | Nullable(String) | |
-| design_back_name | Nullable(String) | |
-| ordi_base_price | Decimal(20,2) | |
-| ordi_online_id | Nullable(String) | platform item ID |
+| send_print | Int16 | Lệnh ink: 0=chưa gửi; 1=đã gửi |
+| ordi_quantity_error | Int16 | Số lượng áo in lỗi |
+| ordi_quantity_adjust | Int64 | Dùng để check số lượng trừ stock |
+| side_print | Nullable(String) | Mặt in — dùng cho order import từ ngoài vào |
+| is_import | Int16 | Order import: 0=no; 1=yes |
+| design_path | Nullable(String) | Link design được lưu (mặt trước) |
+| design_path_back | Nullable(String) | Link design mặt sau |
+| design_front_name | Nullable(String) | Import: Tên hình design mặt trước |
+| design_back_name | Nullable(String) | Import: Tên hình design mặt sau |
+| ordi_base_price | Decimal(20,2) | Giá base price tại thời điểm mua hàng |
+| ordi_online_id | Nullable(String) | Item online ID (platform) |
 | asin_online_id | Nullable(String) | Amazon ASIN |
-| sellersku_online_id | Nullable(String) | |
+| sellersku_online_id | Nullable(String) | Seller SKU trên platform |
 | title_online_id | Nullable(String) | |
-| ordi_package | Nullable(String) | |
-| is_print_barcode | Int16 | |
-| printer_path_front | Nullable(String) | |
-| printer_path_back | Nullable(String) | |
-| ordi_quality_number | Int64 | |
-| create_arx4 | Int16 | |
-| location_item | Nullable(String) | |
-| ordi_backup | Nullable(String) | |
-| ordi_user_printer | Int64 | |
-| ordi_assets | Nullable(String) | |
-| ordi_type | Int16 | item type ⭐ (used for product_type lookup) |
-| ord_id_related | Int64 | |
-| ordi_tracking | Nullable(String) | |
-| ordi_json_tracking | Nullable(String) | |
+| ordi_package | Nullable(String) | Thông tin package lúc buy label |
+| is_print_barcode | Int16 | 0=chưa in; 1=đã in; 2=in lại |
+| printer_path_front | Nullable(String) | ARX4 front path |
+| printer_path_back | Nullable(String) | ARX4 back path |
+| ordi_quality_number | Int64 | Số lượng cần quality check |
+| create_arx4 | Int16 | 0=không tạo; 1=tạo file in; 2=đã tạo; 3=đã xóa; 4=xóa fail |
+| location_item | Nullable(String) | Nơi mua áo |
+| ordi_backup | Nullable(String) | Backup khi variant thay đổi |
+| ordi_user_printer | Int64 | ID user printer |
+| ordi_assets | Nullable(String) | JSON assets |
+| ordi_type | Int16 | Item type ⭐: 0=Garment; 1=Mug; 2=Poster; 3=Case |
+| ord_id_related | Int64 | ID order liên quan với item này |
+| ordi_tracking | Nullable(String) | Tracking code related |
+| ordi_json_tracking | Nullable(String) | JSON tracking |
 | path_fba | Nullable(String) | FBA path |
-| ordi_old_id | Nullable(Int64) | |
+| ordi_old_id | Nullable(Int64) | Đồng bộ data giữa 2 item do split order |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
