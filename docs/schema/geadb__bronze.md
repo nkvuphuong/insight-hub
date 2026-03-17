@@ -137,10 +137,10 @@
 | group_id | Int64 | |
 | group_type | Int64 | |
 | attr_value | String | |
-| attr_quantity | Int16 | |
-| attr_value_special | Nullable(String) | |
-| attr_mockup_special | Nullable(String) | |
-| attr_price | String | |
+| attr_quantity | Int16 | Số lượng Unit |
+| attr_value_special | Nullable(String) | Color special for exproduct |
+| attr_mockup_special | Nullable(String) | Mockup special |
+| attr_price | String | Giá này chỉ áp dụng cho size |
 | attr_description | String | |
 | attr_image | Nullable(String) | |
 | attr_time | Int64 | |
@@ -148,7 +148,7 @@
 | attr_status | Int16 | |
 | attr_deleted | Int16 | |
 | attr_order | Int64 | |
-| attr_code | Nullable(String) | |
+| attr_code | Nullable(String) | Dùng cho color |
 | attr_updated_at | DateTime64(0,'UTC') | |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -174,7 +174,7 @@
 | ba_country | Int64 | FK → nh_country |
 | ba_time | Int64 | |
 | ba_deleted | Int16 | |
-| ba_type | Int16 | |
+| ba_type | Int16 | 0=scan trademark; 1=verify address |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -190,57 +190,57 @@
 | cam_id | Int64 | PK |
 | cam_name | String | |
 | cam_description | String | |
-| cam_number_date | Int64 | |
-| cam_is_restart | Int16 | |
-| cam_is_private | Int16 | |
-| cam_is_default | Int16 | |
+| cam_number_date | Int64 | Số ngày chiến dịch |
+| cam_is_restart | Int16 | Tự động restart chiến dịch |
+| cam_is_private | Int16 | Chọn làm private (Không search được) |
+| cam_is_default | Int16 | Dùng cấu hình mặc định |
 | cam_display_countdown | Int16 | |
 | cam_display_homepage | Int16 | |
-| member_id | Int64 | FK → nh_customer |
-| sales_goal | Int64 | |
-| append_producttype | Int16 | |
+| member_id | Int64 | FK → nh_customer (id KH) |
+| sales_goal | Int64 | Số mục tiêu bán hàng — chỉ để hiển thị |
+| append_producttype | Int16 | 1=Append product type to product title |
 | cam_spin | Nullable(String) | |
-| upsell_discount | Decimal(20,0) | |
-| cam_time_end | Int64 | |
-| cam_time | DateTime | |
-| cam_datetime | Int64 | |
-| cam_time_update | Int64 | |
-| cam_show_info | Int16 | |
-| cam_status | Int16 | 1=active |
-| pcam_id_default | Int64 | |
-| attr_id_default | Int64 | |
-| is_front_default | Int16 | |
+| upsell_discount | Decimal(20,0) | Giá discount dùng cho upsell. Đơn vị $ |
+| cam_time_end | Int64 | Thời gian kết thúc chiến dịch |
+| cam_time | DateTime | Thời gian tạo |
+| cam_datetime | Int64 | Time create date 00:00 |
+| cam_time_update | Int64 | Thời gian update thông tin |
+| cam_show_info | Int16 | Hiển thị mục tiêu và số lượng bán trên trang chiến dịch |
+| cam_status | Int16 | 0=ended; 1=active; 2=declined; 3=processing |
+| pcam_id_default | Int64 | ID sản phẩm dùng làm hiển thị mặc định |
+| attr_id_default | Int64 | ID thuộc tính màu mặc định |
+| is_front_default | Int16 | 1=trước; 0=sau |
 | facebook_pixel | Nullable(String) | |
 | custom_audience | Nullable(String) | |
 | perfect_audience | Nullable(String) | |
 | google_analytics_id | Nullable(String) | |
-| cam_url | String | |
+| cam_url | String | URL campaigns |
 | cam_deleted | Int16 | |
 | cam_archived | Int16 | |
-| cam_profit | Float32 | |
-| cam_sold | Int64 | |
-| cam_stats_show | Int16 | |
-| store_list | String | |
+| cam_profit | Float32 | Lợi nhuận |
+| cam_sold | Int64 | Số lượng đã bán |
+| cam_stats_show | Int16 | Hiển thị trang stats |
+| store_list | String | Danh sách store mà campaign thuộc |
 | cam_view | Int64 | |
-| is_sync | Int16 | |
+| is_sync | Int16 | 0=chưa sync; 1=đã sync |
 | collection_id | String | |
 | list_pcam_id | String | |
-| tags_list | String | |
-| cam_type | Int16 | |
-| zone_id | String | |
-| token | String | |
-| img_default_front | Int64 | |
-| img_default_back | Int64 | |
+| tags_list | String | List ID tags |
+| cam_type | Int16 | 0=campaign up hình design; 1=campaign up hình render |
+| zone_id | String | Mã vùng vận chuyển |
+| token | String | Token image |
+| img_default_front | Int64 | ID hình mặc định mặt trước |
+| img_default_back | Int64 | Hình mặc định mặt sau |
 | token_key | Nullable(String) | |
-| cam_type_group | Int16 | |
-| store_id | Int64 | FK → nh_store_integrations |
-| cam_sync | Int16 | |
-| platform_id | Int16 | |
+| cam_type_group | Int16 | 1=Combine product; 2=Split product |
+| store_id | Int64 | FK → nh_store_integrations (id store mặc định dùng cho sync product) |
+| cam_sync | Int16 | 0=không sync; 1=pending sync; 2=processing sync; 3=done |
+| platform_id | Int16 | 1=shopify; 2=woo |
 | is_customize_text | Int16 | |
 | customize_text_id_front | Int64 | |
 | customize_text_id_back | Int64 | |
-| variant_number | Int64 | |
-| sync_tmp | Int16 | |
+| variant_number | Int64 | Tổng số variant của campaign |
+| sync_tmp | Int16 | 0=Pending; 1=Processing; 2=Complete |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -275,7 +275,7 @@
 | cml_module_id | Int64 | |
 | cml_title | Nullable(String) | |
 | cml_note | Nullable(String) | |
-| cml_status | UInt16 | |
+| cml_status | UInt16 | 0=Pending; 1=Approved; 2=Cancelled |
 | cml_content | String | |
 | user_id | UInt64 | FK → nh_user |
 | cml_deleted | Int16 | |
@@ -354,8 +354,8 @@
 | country_iso_code | String | e.g. 'US', 'CA' |
 | country_name | String | |
 | country_sort | Int64 | |
-| country_area_code | Nullable(String) | |
-| ctry_shipping_suspended | Int16 | |
+| country_area_code | Nullable(String) | Khu vực (us, eu v.v..) |
+| ctry_shipping_suspended | Int16 | Đánh dấu các quốc gia bị suspend vận chuyển |
 | country_ioss_required | Int16 | EU IOSS |
 | country_tax | Float32 | |
 | country_updated_at | DateTime64(0,'UTC') | |
@@ -389,7 +389,7 @@
 | cus_address | String | |
 | cus_address2 | String | |
 | cus_city | String | |
-| cus_state | Nullable(String) | |
+| cus_state | Nullable(String) | State |
 | cus_country | String | |
 | cus_zip | String | |
 | cus_postalcode | String | |
@@ -397,32 +397,32 @@
 | cus_group | String | |
 | cus_sex | String | |
 | cus_birthday | Nullable(Int64) | |
-| cus_total_spend | Decimal(20,2) | |
-| cus_total_order | Int64 | |
-| cus_balance | Decimal(20,2) | |
-| cus_balance_rewards | Decimal(20,2) | |
-| cus_profit | Decimal(20,2) | |
-| cus_level | Int16 | |
-| cus_tier_level | Int16 | |
-| cus_status | Int16 | |
-| is_whitelist | Int16 | |
+| cus_total_spend | Decimal(20,2) | Tổng chi tiêu |
+| cus_total_order | Int64 | Tổng đơn hàng |
+| cus_balance | Decimal(20,2) | Balance Wallet |
+| cus_balance_rewards | Decimal(20,2) | Balance rewards |
+| cus_profit | Decimal(20,2) | Total profit |
+| cus_level | Int16 | Reseller Level |
+| cus_tier_level | Int16 | 0=Sale price; 1=Sale price old; 2=Silver; 3=Gold; 4=30k; 5=50k |
+| cus_status | Int16 | 0=chưa kích hoạt; 1=đã kích hoạt; 2=đã khoá |
+| is_whitelist | Int16 | 0=Not in whitelist; 1=in whitelist for scan trademark |
 | cus_enable_paypal_fee | Int16 | |
 | cus_mass_payment | Int16 | |
-| cus_instant_paypal | Int16 | |
+| cus_instant_paypal | Int16 | Cho phép customer dùng phương thức thanh toán paypal instant |
 | cus_prevent_payment | Int16 | |
-| active_wallet | Int16 | |
-| active_platform | Int16 | |
-| allow_label_order | Int16 | |
-| cus_sell_on | Nullable(String) | |
-| cus_email_verification | Int16 | |
-| cus_connected_facebook | Int16 | |
+| active_wallet | Int16 | 1=Actived Wallet |
+| active_platform | Int16 | 0=chưa active; 1=đã active |
+| allow_label_order | Int16 | 0=not allow; 1=allow |
+| cus_sell_on | Nullable(String) | 1=marketplace; 2=platform; 3=others |
+| cus_email_verification | Int16 | 0=unverified; 1=verified |
+| cus_connected_facebook | Int16 | 0=not connected; 1=connected |
 | cus_facebook_id | Nullable(String) | |
-| cus_connected_google | Int16 | |
+| cus_connected_google | Int16 | 0=not connected; 1=connected |
 | cus_last_login_at | Nullable(DateTime64(0,'UTC')) | |
 | cus_updated_at | DateTime64(0,'UTC') | |
-| cus_internal | Int16 | |
-| cus_login_method | Int16 | |
-| cus_app_version | String | |
+| cus_internal | Int16 | 0=normal seller; 1=GM staff |
+| cus_login_method | Int16 | 0=Login check session; 1=Login check token |
+| cus_app_version | String | Determine the application version seller registered (account/portal_app/next_app) |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -454,13 +454,13 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | mockup_id | Int64 | PK |
-| exp_id | Int64 | FK → nh_exproduct |
+| exp_id | Int64 | FK → nh_exproduct (ID exp Product) |
 | cus_id | Int64 | FK → nh_customer |
 | mockup_name | Nullable(String) | |
-| mockup_img_frontpath | Nullable(String) | |
-| mockup_img_frontname | Nullable(String) | |
-| mockup_img_backpath | Nullable(String) | |
-| mockup_img_backname | Nullable(String) | |
+| mockup_img_frontpath | Nullable(String) | Path mockup front |
+| mockup_img_frontname | Nullable(String) | File mockup front |
+| mockup_img_backpath | Nullable(String) | Path mockup back |
+| mockup_img_backname | Nullable(String) | File mockup back |
 | box_front_top | Int64 | |
 | box_front_left | Int64 | |
 | box_back_top | Int64 | |
@@ -483,7 +483,7 @@
 | cus_profile_id | Int64 | PK |
 | cus_id | Int64 | FK → nh_customer |
 | workshop_address | String | |
-| print_type | Int16 | |
+| print_type | Int16 | 0=All; 1=DTG; 2=DTF |
 | created_at | Int64 | |
 | updated_at | Int64 | |
 | is_deleted | Int64 | |
@@ -524,24 +524,24 @@
 |---|---|---|
 | exp_time_update | Int64 | unix timestamp update |
 | exp_status | Int16 | |
-| exp_display | Int16 | |
-| exp_display_on_report | Int16 | |
+| exp_display | Int16 | 0=hidden; 1=show account |
+| exp_display_on_report | Int16 | 0=Disabled; 1=Enabled — display on metadata report |
 | exp_deleted | Int16 | soft delete |
 | exp_shorturl | String | |
 | exp_order | Int64 | |
 | is_sameproduct | Int16 | |
-| exp_list_color | Nullable(String) | |
-| exp_list_size | Nullable(String) | |
+| exp_list_color | Nullable(String) | Đây là exp_option1 |
+| exp_list_size | Nullable(String) | Đây là exp_option2 |
 | exp_color_default | Nullable(String) | |
 | exp_size_default | Nullable(String) | |
-| box_front_top | Int64 | print box dimensions |
-| box_front_left | Int64 | |
-| box_front_width | Int64 | |
-| box_front_height | Int64 | |
-| box_back_top | Int64 | |
-| box_back_left | Int64 | |
-| box_back_width | Int64 | |
-| box_back_height | Int64 | |
+| box_front_top | Int64 | Tọa độ top khung trước (%) |
+| box_front_left | Int64 | Tọa độ left khung trước (%) |
+| box_front_width | Int64 | Chiều rộng khung trước (%) |
+| box_front_height | Int64 | Chiều cao khung trước (%) |
+| box_back_top | Int64 | Tọa độ top khung sau (%) |
+| box_back_left | Int64 | Tọa độ left khung sau (%) |
+| box_back_width | Int64 | Chiều rộng khung sau (%) |
+| box_back_height | Int64 | Chiều cao khung sau (%) |
 | exp_sku | Nullable(String) | |
 | exp_model | Nullable(String) | |
 | exp_buy_price | Float32 | |
@@ -554,32 +554,32 @@
 | exp_short_brand | Nullable(String) | |
 | exp_typename | Nullable(String) | |
 | exp_code | Nullable(String) | |
-| print_location | Nullable(String) | |
-| exp_mokup_front | Nullable(String) | |
-| exp_mokup_back | Nullable(String) | |
+| print_location | Nullable(String) | In mặt trước, mặt sau |
+| exp_mokup_front | Nullable(String) | Mockup mặt trước |
+| exp_mokup_back | Nullable(String) | Mockup mặt sau |
 | user_id | Int64 | FK → nh_user |
 | exp_option1 | Nullable(String) | |
 | exp_option2 | Nullable(String) | |
 | exp_option3 | Nullable(String) | |
-| exp_inventory_tracking | Int16 | |
-| template_print | Nullable(String) | |
-| exp_avatar | Nullable(String) | |
-| exp_avatar_hover | Nullable(String) | |
-| sup_id | Int64 | supplier ID |
-| id_scalable | Nullable(String) | |
-| exp_data_size | Nullable(String) | |
-| cc_product_id | Int64 | |
-| shipping_class | Nullable(String) | |
-| is_primary | Int16 | |
+| exp_inventory_tracking | Int16 | 0=Normal; 1=Lot; 2=Serial Number |
+| template_print | Nullable(String) | Key template print |
+| exp_avatar | Nullable(String) | Avatar product |
+| exp_avatar_hover | Nullable(String) | Hình avatar khi hover |
+| sup_id | Int64 | supplier ID (1=SSA; 2=other) |
+| id_scalable | Nullable(String) | Product ID scalablepress |
+| exp_data_size | Nullable(String) | Json size của hình mockup |
+| cc_product_id | Int64 | Custom Cat Product ID |
+| shipping_class | Nullable(String) | Json lưu thông tin shipping class |
+| is_primary | Int16 | 0=unknown; 1=primary product; 2=secondary product |
 | exp_id_mapping | Int64 | |
-| exp_recommend | Nullable(String) | |
-| exp_featured | Int16 | |
-| exp_trending | Nullable(Int16) | |
-| exp_leading_profit | Int16 | |
+| exp_recommend | Nullable(String) | Recommend product when this product out stock |
+| exp_featured | Int16 | 0=sản phẩm bình thường; 1=sản phẩm nổi bật |
+| exp_trending | Nullable(Int16) | 0=not trending; 1=is trending |
+| exp_leading_profit | Int16 | Sản phẩm bán đứng đầu lợi nhuận |
 | exp_rate_by_merchant | Int16 | |
-| exp_category | Nullable(String) | |
+| exp_category | Nullable(String) | Danh sách các category mà sản phẩm thuộc về |
 | exp_hscode | Nullable(String) | HS code (customs) |
-| exp_fulfillment_type | Nullable(Int16) | |
+| exp_fulfillment_type | Nullable(Int16) | -1=chưa set; 0=POD |
 | exp_updated_at | DateTime64(0,'UTC') | |
 | exp_feature_description | Nullable(String) | |
 | exp_care_instruction | Nullable(String) | |
@@ -603,11 +603,11 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | eli_id | Int64 | PK |
-| exp_id | Int64 | FK → nh_exproduct |
-| pg_id | Int64 | FK → nh_product_group |
-| eli_avatar | Nullable(String) | |
-| eli_avatar_hover | Nullable(String) | |
-| eli_default | Int16 | |
+| exp_id | Int64 | FK → nh_exproduct; Id của product |
+| pg_id | Int64 | FK → nh_product_group; ID của category. Dùng để load theo category cụ thể nếu cần |
+| eli_avatar | Nullable(String) | Tên của image (mặc định phần path nằm trong exproduct) |
+| eli_avatar_hover | Nullable(String) | Tên của image khi hover (nếu cần) (mặc định phần path nằm trong exproduct) |
+| eli_default | Int16 | Mark default image when it show in the category |
 | eli_time | DateTime64(0,'UTC') | |
 | eli_deleted | Int16 | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -624,17 +624,17 @@
 |---|---|---|
 | gm_id | Int64 | PK |
 | store_id | Int64 | FK → nh_store_integrations |
-| gm_bg_hex | Nullable(String) | background hex color |
-| gm_color_hex | Nullable(String) | text color |
-| gm_img_logo | Nullable(String) | logo image |
-| gm_message | Nullable(String) | message template |
-| gm_approve | Int16 | |
-| gm_time_start | Int64 | |
-| gm_time_end | Int64 | |
+| gm_bg_hex | Nullable(String) | Màu background của gift card |
+| gm_color_hex | Nullable(String) | Màu text của gift message |
+| gm_img_logo | Nullable(String) | Link image logo |
+| gm_message | Nullable(String) | Text của gift card. Dùng cho trường hợp KH làm discount tặng buyer |
+| gm_approve | Int16 | 0=Chưa approve; 1=đã approve; 2=disable |
+| gm_time_start | Int64 | Thời gian bắt đầu áp dụng (Dùng cho create gift card discount) |
+| gm_time_end | Int64 | Thời gian kết thúc áp dụng (Dùng cho create gift card discount) |
 | gm_time | Int64 | unix created |
 | gm_time_update | Int64 | unix updated |
 | gm_deleted | Int16 | |
-| gm_type | Int16 | |
+| gm_type | Int16 | 0=Gift message bình thường; 1=gift card discount |
 | cus_id | Int64 | FK → nh_customer |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -651,12 +651,12 @@
 |---|---|---|
 | img_id | Int64 | PK |
 | img_name | Nullable(String) | |
-| img_original | Nullable(String) | original file path |
+| img_original | Nullable(String) | Tên gốc dùng để search |
 | img_path | Nullable(String) | CDN path |
 | img_time | DateTime | created time |
 | img_time_date | Int64 | |
 | img_time_update | Int64 | |
-| img_status | Int16 | |
+| img_status | Int16 | 0=ẩn; 1=hiện |
 | img_archived | Int16 | |
 | img_deleted | Int16 | |
 | cus_id | Int64 | FK → nh_customer |
@@ -676,7 +676,7 @@
 | ipl_id | UInt64 | PK |
 | ord_id | UInt64 | FK → nh_order |
 | ordi_id | UInt64 | FK → nh_order_item |
-| print_location | Nullable(String) | location name |
+| print_location | Nullable(String) | side print |
 | design_path | Nullable(String) | |
 | design_name | Nullable(String) | |
 | exp_id | UInt64 | FK → nh_exproduct |
@@ -684,7 +684,7 @@
 | color_id | UInt16 | |
 | size_id | UInt16 | |
 | is_matched | UInt16 | |
-| price | Decimal(20,2) | |
+| price | Decimal(20,2) | Giá theo mặt print |
 | is_main_location | UInt16 | |
 | created_time | DateTime | |
 | updated_time | DateTime64(0,'UTC') | |
@@ -705,7 +705,7 @@
 | material_id | Int64 | PK |
 | material_name | Nullable(String) | |
 | material_description | Nullable(String) | |
-| material_status | Int16 | |
+| material_status | Int16 | 0=hide; 1=show |
 | material_deleted | Int16 | |
 | material_order | Int64 | |
 | material_time | Int64 | |
@@ -828,9 +828,9 @@
 |---|---|---|
 | oact_id | Int64 | PK |
 | ord_id | Int64 | FK → nh_order |
-| ref_id | Int64 | reference ID |
-| ref_src | Nullable(String) | reference source |
-| oact_activity | Nullable(String) | activity description |
+| ref_id | Int64 | Khóa ngoại đến các bảng liên quan |
+| ref_src | Nullable(String) | Bảng liên quan (logs, trackings, v.v...) |
+| oact_activity | Nullable(String) | Thao tác |
 | user_id | Int64 | FK → nh_user |
 | cus_id | Int64 | FK → nh_customer |
 | oact_time | DateTime | |
@@ -866,11 +866,11 @@
 |---|---|---|
 | ord_id | Int64 | FK → nh_order (PK) |
 | price_gift_message | Float32 | gift message price |
-| ext_content | Nullable(String) | content |
-| image_gift_message | Nullable(String) | image |
+| ext_content | Nullable(String) | Chứa thông tin in gift card |
+| image_gift_message | Nullable(String) | Image render gift message |
 | ext_time | Int64 | |
 | ext_time_update | DateTime64(0,'UTC') | |
-| ext_multiple_gift | Nullable(Int16) | |
+| ext_multiple_gift | Nullable(Int16) | 0=single gm; 1=multiple gm (nhiều gift message lưu ở nh_gift_image) |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -887,21 +887,21 @@
 | ord_id | Int64 | FK → nh_order (PK) |
 | ordx_tracking_number | Nullable(String) | tracking number ⭐ |
 | ordx_content | Nullable(String) | |
-| ordx_create_label | Int16 | |
-| ordx_fulfill_locate | String | fulfill location ⭐ (e.g. 'US', 'VN') |
+| ordx_create_label | Int16 | 0=chưa tạo; 1=đã tạo; 2=cho tạo label bằng tay |
+| ordx_fulfill_locate | String | fulfill location ⭐ (e.g. 'TX1', 'HB1', 'EU1') |
 | ordx_items_quantity | Int64 | total items |
-| ordx_print_3rd_status | Nullable(String) | |
-| ordx_print_3rd_sync | Int16 | |
-| ordx_is_check_stock | Int16 | |
-| ordx_type_error | Int16 | |
+| ordx_print_3rd_status | Nullable(String) | Trạng thái order của bên in thứ 3 |
+| ordx_print_3rd_sync | Int16 | Check sync thông tin bên printing 3rd |
+| ordx_is_check_stock | Int16 | 0=chưa check; 1=đã check có hàng; 2=có hàng nhưng chưa insert variant stock |
+| ordx_type_error | Int16 | 0=no error; 1=Wrong t-shirt; 2=Wrong size; 3=Wrong print; 4=Bad print; 5=Missing item(s); 6=Orders are late; 7=Lost package; 8=Tracking code does not work; 9=Partial refund; 10=Full refund; 11=re-buy label; 12=Damaged t-shirt |
 | ordx_archived | Int16 | |
-| ordx_print_label | Int16 | |
-| ordx_workshop_push | Int16 | |
+| ordx_print_label | Int16 | 0=chưa print label; 1=đã print label |
+| ordx_workshop_push | Int16 | 0=not add cronjob; 1=added cronjob |
 | ordx_ioss_number | Nullable(String) | IOSS number (EU VAT) |
 | ordx_ioss_number_total | Float32 | |
-| buyer_tax_number | Nullable(String) | |
+| buyer_tax_number | Nullable(String) | Tax code của buyer |
 | buyer_tax_amount | Float32 | |
-| ordx_ignore_healthcheck | Nullable(Int16) | |
+| ordx_ignore_healthcheck | Nullable(Int16) | Đánh dấu để bỏ qua healthcheck |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -919,7 +919,7 @@
 | amount | Decimal(20,2) | fee amount |
 | time_create | DateTime | |
 | cus_id | Int64 | FK → nh_customer |
-| extra_type | Int16 | fee type |
+| extra_type | Int16 | 0=surcharge label; 2=Thanks card; 3=Season Fee; 4=Rush fee |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -1022,8 +1022,8 @@
 | ord_note_id | Int64 | PK |
 | ord_id | Int64 | FK → nh_order |
 | ord_note_content | Nullable(String) | internal note |
-| ord_gift_message | Nullable(String) | gift message |
-| image_gift_message | Nullable(String) | |
+| ord_gift_message | Nullable(String) | Nội dung in thiệp |
+| image_gift_message | Nullable(String) | Hình gift card được tạo từ cron |
 | ord_note_time | DateTime | |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -1062,9 +1062,9 @@
 | created_time | Int64 | unix created |
 | created_datetime | Int64 | |
 | refund_fastship | Int16 | |
-| type_refund | Int16 | refund type |
-| unit_refund | Int64 | |
-| reason_id | Int64 | refund reason |
+| type_refund | Int16 | 0=normal; 1=fastship refund; 2=partially refund; 3=shipping cost refund; 4=handle fee; 5=basecost |
+| unit_refund | Int64 | units refunded; dùng cho refund 1 phần |
+| reason_id | Int64 | Lý do refund nằm trong bảng nh_issue_category |
 | updated_at | DateTime64(0,'UTC') | |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -1096,9 +1096,9 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | ord_id | UInt64 | FK → nh_order (PK) |
-| pla_id | UInt16 | platform ID |
-| cme_id | UInt16 | channel/method ID |
-| is_label | UInt16 | is label order |
+| pla_id | UInt16 | FK → nh_platforms.pla_id |
+| cme_id | UInt16 | FK → nh_creation_methods.cme_id |
+| is_label | UInt16 | The order is label order or not |
 | created_at | DateTime64(0,'UTC') | |
 | updated_at | DateTime64(0,'UTC') | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -1132,22 +1132,22 @@
 |---|---|---|
 | pay_id | Int64 | PK |
 | cus_id | Int64 | FK → nh_customer |
-| pay_email | Nullable(String) | |
+| pay_email | Nullable(String) | only use for paypal account |
 | pay_default | Int16 | default flag |
-| pay_type | Int16 | payment type |
+| pay_type | Int16 | 0=paypal; 1=payooner; 2=creditcard; 3=g-wallet |
 | pay_time | Int64 | |
-| pay_content | Nullable(String) | |
-| pay_ref_id | Nullable(String) | |
+| pay_content | Nullable(String) | Payment billing. Paypal => transaction_id |
+| pay_ref_id | Nullable(String) | cus id reference in 3rd |
 | pay_deleted | Int16 | |
-| balance_id | Nullable(String) | |
+| balance_id | Nullable(String) | ID balance of PO |
 | access_token | Nullable(String) | |
 | refresh_token | Nullable(String) | |
 | time_token_expired | Int64 | |
-| pay_default_billing | Int16 | |
+| pay_default_billing | Int16 | Set default billing for deposit |
 | payoneer_agreement | Int16 | |
 | payoneer_payee_status | Nullable(String) | |
-| lasted_payment_time | Int64 | |
-| lasted_payment_status | Nullable(String) | |
+| lasted_payment_time | Int64 | Thời gian payment của lần gần nhất |
+| lasted_payment_status | Nullable(String) | Status lần cuối payment |
 | braintree_customer_info | Nullable(String) | |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -1181,7 +1181,7 @@
 |---|---|---|
 | print_type_id | Int64 | PK |
 | print_type_name | Nullable(String) | |
-| print_type_code | Int16 | |
+| print_type_code | Int16 | -1=chưa có mã code |
 | print_type_description | Nullable(String) | |
 | print_type_status | Int16 | |
 | print_type_deleted | Int16 | |
@@ -1205,11 +1205,11 @@
 |---|---|---|
 | pcam_id | Int64 | PK |
 | exp_id | Int64 | FK → nh_exproduct |
-| pcam_color | String | color |
-| pcam_size | Nullable(String) | size |
+| pcam_color | String | Chuỗi id thuộc tính color |
+| pcam_size | Nullable(String) | Chuỗi id thuộc tính size |
 | pcam_price | Float32 | selling price |
-| pcam_compare_price | Float32 | compare-at price |
-| pcam_content | Nullable(String) | |
+| pcam_compare_price | Float32 | Giá cũ |
+| pcam_content | Nullable(String) | Lưu json các thông tin cần thiết |
 | pcam_short_product_type | Nullable(String) | short type name |
 | pcam_quantity | Int64 | |
 | pcam_img_front | String | front mockup image |
@@ -1218,12 +1218,12 @@
 | pcam_img_upback | String | |
 | cam_id | Int64 | FK → nh_campaigns |
 | pcam_time | DateTime | |
-| member_id | Int64 | |
-| mockup_id | Int64 | |
-| pcam_path_front | String | design path front |
-| pcam_path_back | String | design path back |
-| tmp_path_front | String | |
-| tmp_path_back | String | |
+| member_id | Int64 | id khách hàng |
+| mockup_id | Int64 | Mockup id profile |
+| pcam_path_front | String | Đường dẫn hình mặt trước |
+| pcam_path_back | String | Đường dẫn hình mặt sau |
+| tmp_path_front | String | Link hình trong tmp |
+| tmp_path_back | String | Link hình trong tmp |
 | pcam_width_front | Int64 | print box dimensions |
 | pcam_height_front | Int64 | |
 | pcam_width_back | Int64 | |
@@ -1232,14 +1232,14 @@
 | pcam_top_front | Int64 | |
 | pcam_left_back | Int64 | |
 | pcam_top_back | Int64 | |
-| typeprint | Int16 | print type |
+| typeprint | Int16 | uni |
 | color_print_front | Int64 | |
 | color_print_back | Int64 | |
 | pcam_deleted | Int16 | |
 | token_key | Nullable(String) | |
 | pcam_img_token | Nullable(String) | |
-| pcam_sync | Int16 | |
-| variant_number | Int64 | |
+| pcam_sync | Int16 | 0=No sync; 1=sync; 2=processing; 3=complete |
+| variant_number | Int64 | Tổng số variant của product |
 | pcam_color_default | Int64 | |
 | pcam_size_default | Int64 | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -1256,12 +1256,12 @@
 |---|---|---|
 | pp_id | UInt64 | PK |
 | exp_id | Int64 | FK → nh_exproduct |
-| ppl_id | UInt64 | FK → nh_product_print_location |
+| ppl_id | UInt64 | FK → nh_product_print_location; ID from nh_product_print_location |
 | pp_price | Nullable(Float32) | |
 | pp_time | Int64 | |
 | pp_time_update | DateTime64(0,'UTC') | |
-| image | Nullable(String) | |
-| seasonal_image | Nullable(String) | |
+| image | Nullable(String) | URL mockup |
+| seasonal_image | Nullable(String) | Hình ảnh mockup theo mùa:Halloween, Noel |
 | box_top | Decimal(20,2) | |
 | box_left | Decimal(20,2) | |
 | box_width | Decimal(20,2) | |
@@ -1287,14 +1287,14 @@
 | product_group_parent | Nullable(Int64) | parent group (hierarchy) |
 | product_group_name | String | group name ⭐ |
 | product_group_code | String | group code ⭐ |
-| product_group_status | Int16 | |
+| product_group_status | Int16 | 0=ẩn; 1=hiện |
 | product_group_description | Nullable(String) | |
 | product_group_avatar | Nullable(String) | |
-| product_group_type | Int16 | |
+| product_group_type | Int16 | 0=hàng hóa; 1=dịch vụ GTGT |
 | pg_shorturl | String | |
-| product_group_order | Int64 | |
-| cat_gallery_id | Int64 | |
-| attr_group | Int64 | |
+| product_group_order | Int64 | Sắp xếp danh mục |
+| cat_gallery_id | Int64 | Danh mục gallery |
+| attr_group | Int64 | attribute group_id |
 | product_group_banner | Nullable(String) | |
 | product_group_is_collection | Nullable(Int16) | |
 | product_group_is_new | Nullable(Int16) | |
@@ -1313,7 +1313,7 @@
 |---|---|---|
 | ppl_id | UInt64 | PK |
 | ppl_name | Nullable(String) | location name |
-| ppl_status | Int16 | |
+| ppl_status | Int16 | 0=Deactive; 1=Active |
 | ppl_created_time | DateTime64(0,'UTC') | |
 | ppl_updated_time | DateTime64(0,'UTC') | |
 | ppl_deleted | Int16 | |
@@ -1354,8 +1354,8 @@
 | rush_id | Int64 | PK |
 | cro_id | Int64 | |
 | rush_order_id | Int64 | FK → nh_order |
-| rush_status | Int16 | |
-| rush_over | Int16 | |
+| rush_status | Int16 | 0=unuse; 1=used |
+| rush_over | Int16 | 0=rush thường; 1=rush over slot |
 | rush_datetime | Int64 | |
 | created_time | Int64 | |
 | used_time | Int64 | |
@@ -1375,9 +1375,9 @@
 | ord_id | Int64 | FK → nh_order (PK) |
 | label_url | Nullable(String) | |
 | label_cdn_link | Nullable(String) | |
-| platform | Nullable(String) | |
-| status | Int16 | |
-| debug_message | Nullable(String) | |
+| platform | Nullable(String) | nh_platforms.pla_name |
+| status | Int16 | 0=pending; 1=processing; 2=success; 3=failed |
+| debug_message | Nullable(String) | Nội dung file label trường hợp scan bị fail |
 | created_at | DateTime64(0,'UTC') | |
 | updated_at | DateTime64(0,'UTC') | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -1396,27 +1396,27 @@
 | ship_id | Int64 | PK |
 | ship_name | Nullable(String) | |
 | ship_code | Nullable(String) | |
-| ship_status | Nullable(String) | status string |
-| ship_price | Decimal(20,2) | shipping cost |
+| ship_status | Nullable(String) | Trạng thái bên shipment |
+| ship_price | Decimal(20,2) | Label fee |
 | ship_time | DateTime | |
 | ship_time_update | Int64 | |
 | ord_id | Int64 | FK → nh_order |
 | ordi_id | Int64 | FK → nh_order_item |
-| reference_id | Nullable(String) | |
-| ship_scanform | Nullable(String) | |
+| reference_id | Nullable(String) | ID bên partner mua label qua gearment |
+| ship_scanform | Nullable(String) | scanform easypost |
 | ship_batch_id | Nullable(String) | |
 | ship_webhook_id | Nullable(String) | |
 | ship_tracker_id | Nullable(String) | |
 | ship_deleted | Int16 | |
-| ship_carrier | Nullable(String) | carrier name ⭐ |
-| ship_service | Nullable(String) | service level |
+| ship_carrier | Nullable(String) | Tên carrier ⭐ |
+| ship_service | Nullable(String) | Tên service |
 | ship_rate | Nullable(String) | rate response JSON |
 | ship_trackingcode | Nullable(String) | tracking number ⭐ |
 | ship_tracking_link | Nullable(String) | |
 | time_update_scanform | Int64 | |
-| ship_archive | Int16 | |
+| ship_archive | Int16 | 0=không archive; 1=đã archive |
 | ship_carrier_id | Int16 | carrier ID code |
-| ord_status_custom | Int16 | order custom status at ship time |
+| ord_status_custom | Int16 | Status bên order |
 | ship_created_at | DateTime64(0,'UTC') | |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -1434,7 +1434,7 @@
 | sm_id | Int64 | PK |
 | ord_id | Int64 | FK → nh_order |
 | parent_id | Int64 | parent shipment |
-| reference_id | Nullable(String) | |
+| reference_id | Nullable(String) | Id Bên thứ 3 |
 | sm_link_label | Nullable(String) | label link |
 | sm_tracking_number | Nullable(String) | tracking number ⭐ |
 | sm_tracking_company | Nullable(String) | carrier ⭐ |
@@ -1445,13 +1445,13 @@
 | api_source | Nullable(String) | |
 | dhl_package_id | Nullable(String) | |
 | sm_carrier_service | Nullable(String) | |
-| sm_carrier_linked | Nullable(String) | |
+| sm_carrier_linked | Nullable(String) | Dùng cho trường hợp Carrier hiện tại sẽ dùng carrier khác để hiển thị |
 | sm_service_linked | Nullable(String) | |
 | sm_carrier_service_linked | Nullable(String) | |
 | sm_time | DateTime | |
 | sm_time_update | Int64 | |
 | sm_deleted | Int16 | |
-| sm_tracking_sync_status | UInt16 | |
+| sm_tracking_sync_status | UInt16 | 0=pending; 1=processing; 2=Success; 3=Failed |
 | created_at | Nullable(String) | |
 | updated_at | Nullable(String) | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -1469,8 +1469,8 @@
 | sp_id | Int64 | PK |
 | sp_name | Nullable(String) | |
 | sp_key | Nullable(String) | |
-| sp_location | Int16 | |
-| sp_type | Int16 | |
+| sp_location | Int16 | 0=domestic; 1=inter |
+| sp_type | Int16 | 0=stantad; 1=2day; 2=ground |
 | sp_status | Int16 | |
 | sp_config | String | JSON config |
 | sp_time | Int64 | |
@@ -1530,7 +1530,7 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | store_id | Int64 | PK |
-| store_backend_type | Nullable(String) | 'shopify', 'etsy', 'amazon', etc. |
+| store_backend_type | Nullable(String) | vd: wcom, shopify |
 | store_backend_sync | Int16 | |
 | store_show_name | Nullable(String) | display name |
 | store_url | Nullable(String) | store URL |
@@ -1542,22 +1542,22 @@
 | store_secret_key | Nullable(String) | |
 | store_password | Nullable(String) | |
 | store_access_token | Nullable(String) | |
-| store_refresh_token | Nullable(String) | |
-| store_expired | Int16 | token expired flag |
+| store_refresh_token | Nullable(String) | Amazon Merchant Refresh Token |
+| store_expired | Int16 | 1=expired token |
 | store_res_logs | Nullable(String) | |
 | store_res_time | Int64 | |
-| store_id_foreign | Nullable(String) | foreign store ID |
+| store_id_foreign | Nullable(String) | ID của bên thứ 3 |
 | store_time | DateTime | |
 | store_time_update | Int64 | |
 | store_deleted | Int16 | |
 | store_token | Nullable(String) | |
 | store_is_default | Int16 | |
-| store_read_only | Int16 | |
+| store_read_only | Int16 | 1=read only |
 | folder_id | Nullable(String) | |
-| store_autosync | Int16 | |
-| store_send_shipment_type | Int16 | |
+| store_autosync | Int16 | 1=auto sync |
+| store_send_shipment_type | Int16 | 0=Default; 1=Plugin Woo |
 | sync_order_manual_payment | Int16 | |
-| amazon_marketplace_id | Nullable(String) | |
+| amazon_marketplace_id | Nullable(String) | Amazon marketplace id |
 | cam_sync | Int64 | |
 | cron_thread | Int16 | |
 | cam_sync_shopbase | Int64 | |
@@ -1585,7 +1585,7 @@
 |---|---|---|
 | store_inconfig | Int64 | PK |
 | store_id | Int64 | FK → nh_store_integrations |
-| store_refresh_token | Nullable(String) | |
+| store_refresh_token | Nullable(String) | Amazon Merchant Refresh Token |
 | raw_data_token | Nullable(String) | |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -1602,21 +1602,21 @@
 |---|---|---|
 | topup_id | Int64 | PK |
 | cus_id | Int64 | FK → nh_customer |
-| transaction_id | Nullable(String) | |
-| payment_id | String | |
+| transaction_id | Nullable(String) | transaction id của gearment |
+| payment_id | String | ID thanh toán của khách |
 | topup_amount | Decimal(20,2) | amount deposited |
-| topup_type | Int16 | |
-| payment_type | Int16 | |
+| topup_type | Int16 | 1=Payoneer; 2=Pingpong; 3=Paypal; 4=PayPalInstant; 5=LianLian; 6=MassPaypal |
+| payment_type | Int16 | 0=Request; 1=Instant |
 | topup_image | Nullable(String) | |
-| topup_status | Int16 | status |
-| topup_verified | Int16 | |
-| topup_reject_reason | Int16 | |
+| topup_status | Int16 | 0=pending; 1=Completed; 2=Canceled |
+| topup_verified | Int16 | 0=Unverified; 1=Verified; 2=Verified wrong info |
+| topup_reject_reason | Int16 | 1=Wrong transaction ID; 2=Wrong Amount; 3=Wrong Payment method; 4=Other |
 | user_id_approved | Int64 | FK → nh_user (approver) |
 | created_time | Int64 | unix created |
 | updated_time | Int64 | |
 | approved_time | Int64 | |
 | topup_log | Nullable(String) | |
-| topup_level | Int16 | |
+| topup_level | Int16 | 0=Khách top-up new; 1=Khách top-up nhiều lần |
 | topup_deleted | Int16 | |
 | deleted_time | Int64 | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -1652,22 +1652,22 @@
 |---|---|---|
 | trk_id | Int64 | PK |
 | trk_tracking_number | String | tracking number ⭐ |
-| trk_api_type | Nullable(String) | API provider |
-| trk_external_id | Nullable(String) | |
+| trk_api_type | Nullable(String) | osm; easypost; 3rd |
+| trk_external_id | Nullable(String) | ID của API |
 | trk_status | Nullable(String) | tracking status ⭐ |
 | trk_status_detail | Nullable(String) | detailed status |
 | trk_est_delivery_date | Nullable(String) | estimated delivery |
 | trk_weight | Nullable(Float32) | |
 | trk_carrier | Nullable(String) | carrier name ⭐ |
 | trk_service | Nullable(String) | |
-| trk_error_content | Nullable(String) | |
+| trk_error_content | Nullable(String) | Nội dung lỗi từ API nếu có |
 | trk_created_at | Nullable(String) | |
 | trk_updated_at | Nullable(Int64) | |
 | trk_url | Nullable(String) | tracking URL |
-| trk_checked_at | Nullable(Int64) | |
-| trk_checked_times | Nullable(Int16) | |
-| trk_checked_times_error | Nullable(Int16) | |
-| trk_checking_status | Nullable(UInt16) | |
+| trk_checked_at | Nullable(Int64) | Thòi điểm check từ API |
+| trk_checked_times | Nullable(Int16) | Số lần gửi request |
+| trk_checked_times_error | Nullable(Int16) | Số lần check lỗi |
+| trk_checking_status | Nullable(UInt16) | Trạng thái khi gọi API: 0=pending; 1=processing; 2=ok; 3=failed |
 | ord_id | Int64 | FK → nh_order |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
@@ -1690,41 +1690,41 @@
 | transaction_name | Nullable(String) | |
 | transaction_key | Nullable(String) | |
 | transaction_content | Nullable(String) | |
-| transaction_datetime | Nullable(Int64) | |
+| transaction_datetime | Nullable(Int64) | Thời gian tại tời điểm 00:00:00 của ngày |
 | transaction_payment_date | Nullable(Int64) | |
 | transaction_time | Int64 | unix created |
 | transaction_time_update | Int64 | |
 | transaction_total | Decimal(20,2) | amount ⭐ |
-| transaction_type | Int16 | type code |
-| transaction_subtype | Nullable(Int16) | |
+| transaction_type | Int16 | 1=Sales; 2=Expenses |
+| transaction_subtype | Nullable(Int16) | 1=invoices; 2=receive; 3=sales; 4=estimate; 5=bill; 6=expense; 7=bill payment; 8=credit memo; 9=add wallet; 10=Commission; 11=Refund |
 | transaction_parent_id | Nullable(Int64) | |
 | transaction_invoice_no | Nullable(Int64) | |
 | transaction_contract_code | Nullable(String) | |
 | transaction_billing_address | Nullable(String) | |
 | transaction_terms | Int64 | |
 | transaction_term_name | Nullable(String) | |
-| transaction_estimate_status | Nullable(Int16) | |
+| transaction_estimate_status | Nullable(Int16) | 0=pending; 1=accepted; 2=closed; 3=rejected |
 | transaction_estimate_date | Int64 | |
 | transaction_accepted_by | Nullable(String) | |
 | transaction_accepted_date | Int64 | |
 | transaction_bill_no | Nullable(Int64) | |
-| transaction_payment_method | Int16 | |
+| transaction_payment_method | Int16 | 0=Cash; 1=credit card; 2=paypal; 3=bank transfer; 4=Internet banking; 5=ATM; 6=Wallet; 7=PO |
 | transaction_ip_address | Nullable(String) | |
-| transaction_status | Int16 | status ⭐ |
+| transaction_status | Int16 | 0=pending; 1=paid; 2=overdue; 3=closed; 4=rejected |
 | transaction_deleted | Int16 | |
 | transaction_confirm_by | Int64 | |
 | transaction_confirm_time | Int64 | |
-| transaction_after_trading | Nullable(Int64) | |
-| transaction_parent | Nullable(Int64) | |
-| transaction_type_cash | Int16 | |
+| transaction_after_trading | Nullable(Int64) | Số dư tài khoản sau khi giao dịch |
+| transaction_parent | Nullable(Int64) | Dùng cho trường hợp huỷ order, hoàn tiền |
+| transaction_type_cash | Int16 | 1=Cộng tiền; 2=trừ tiền |
 | transaction_account | Nullable(Int64) | |
 | transaction_reference_no | Nullable(String) | |
-| transaction_online_id | Nullable(String) | |
-| transaction_balance_from | Decimal(20,2) | balance before |
-| transaction_balance | Decimal(20,2) | balance after |
-| transaction_deposit_from | Int16 | |
-| at_id | Int64 | |
-| cus_type | Int64 | |
+| transaction_online_id | Nullable(String) | TRX ID 3rd |
+| transaction_balance_from | Decimal(20,2) | Balance before |
+| transaction_balance | Decimal(20,2) | Balance after |
+| transaction_deposit_from | Int16 | 1=Deposit from VND |
+| at_id | Int64 | Tài khoản kế toán |
+| cus_type | Int64 | 1=cus_id; 2=supplier_id; 3=Nhân viên |
 | supplier_id | Int64 | |
 | sublog_id | Int64 | |
 | total_order | Int64 | |
@@ -1803,12 +1803,12 @@
 | user_commission_data | Nullable(String) | |
 | user_time | Int16 | |
 | user_time_update | Int64 | |
-| user_is_staff | Int16 | |
+| user_is_staff | Int16 | Là nhân viên |
 | user_range | Int64 | |
-| user_fulfill_locate | Nullable(String) | fulfill location assignment |
-| user_employee_id | Nullable(String) | |
+| user_fulfill_locate | Nullable(String) | fulfill location assignment (HB1, EU1) |
+| user_employee_id | Nullable(String) | Employe ID = String, login with Employee ID without username password (IP Whitelist in CRM) |
 | user_slack_id | Nullable(String) | |
-| user_number_qry | Int16 | |
+| user_number_qry | Int16 | so lan duoc thuc hien query |
 | user_slack_code | Nullable(String) | |
 | user_updated_at | DateTime64(0,'UTC') | |
 | _processed_at | DateTime64(3,'UTC') | |
@@ -1827,7 +1827,7 @@
 | cus_id | Int64 | FK → nh_customer |
 | store_id | Int64 | FK → nh_store_integrations |
 | ul_address | Nullable(String) | |
-| ul_scan_trademark | Int16 | |
+| ul_scan_trademark | Int16 | 0=not scan trademark; 1=scan trademark |
 | ul_time | Int64 | |
 | ul_time_update | Int64 | |
 | ul_deleted | Int16 | |
@@ -1845,17 +1845,17 @@
 | Column | Type | Ghi chú |
 |---|---|---|
 | var_id | Int64 | PK |
-| product_id | Int64 | FK → nh_exproduct |
-| var_title | Nullable(String) | variant title |
-| var_price | Float32 | |
+| product_id | Int64 | FK → nh_exproduct; Đây là exp_id |
+| var_title | Nullable(String) | Shopify: title, var name |
+| var_price | Float32 | Tương đương var_basecost |
 | var_sku | String | SKU |
 | var_position | Int64 | |
 | var_inventory_policy | Nullable(String) | |
 | var_compare_at_price | Nullable(Float32) | |
 | var_fulfillment_service | Nullable(String) | |
 | var_inventory_management | Int64 | |
-| var_option1 | Nullable(String) | option 1 (color/size) |
-| var_option2 | Nullable(String) | option 2 |
+| var_option1 | Nullable(String) | Tương đương var_color |
+| var_option2 | Nullable(String) | Tương đương var_size |
 | var_option3 | Nullable(String) | option 3 |
 | var_created_at | Nullable(DateTime64(0)) | |
 | var_updated_at | DateTime64(0,'UTC') | |
@@ -1863,61 +1863,61 @@
 | var_barcode | Nullable(String) | |
 | var_grams | Int64 | weight in grams |
 | var_image_id | Nullable(String) | |
-| var_inventory_quantity | Int64 | current inventory |
+| var_inventory_quantity | Int64 | update 24/09/2020, save ssaw total qty |
 | var_weight | Float32 | weight |
-| var_weight_unit | Nullable(Int16) | |
+| var_weight_unit | Nullable(Int16) | 1=oz; 2=lb; 3=gram |
 | var_inventory_item_id | String | |
 | var_old_inventory_quantity | Int64 | |
 | var_requires_shipping | Int16 | |
 | var_admin_graphql_api_id | Nullable(String) | |
 | var_stock | Int64 | stock level 1 |
 | var_stock2 | Int64 | stock level 2 |
-| var_available | Int64 | available qty |
-| on_order | Int64 | qty on order |
+| var_available | Int64 | Số lượng khả dụng |
+| on_order | Int64 | Số lượng cần sử dụng |
 | var_extra_charge | Float32 | |
 | var_price_buy | Float32 | buy price |
-| var_re_price | Float32 | |
-| var_cost_price | Float32 | cost price |
-| var_cost_sale | Float32 | |
-| var_hex | Nullable(String) | color hex code |
+| var_re_price | Float32 | Giá recommend |
+| var_cost_price | Float32 | Giá gốc mua từ vendor |
+| var_cost_sale | Float32 | Giá sale off của vendor |
+| var_hex | Nullable(String) | Mã màu hex |
 | var_gtin | Nullable(String) | GTIN barcode |
 | var_time | Int16 | |
 | var_time_update | Int64 | |
 | user_id | Int64 | FK → nh_user |
 | var_deleted | Int16 | |
 | var_status | Int16 | |
-| var_stock_status | Int16 | |
-| available_for_fulfillment | Int16 | |
+| var_stock_status | Int16 | 0=còn hàng; 1=hết hàng; 2=hết hàng quá 5 ngày |
+| available_for_fulfillment | Int16 | Value 1: Variant cho fulfillment |
 | var_harmonized_system_code | String | HS code |
-| var_sync_ref | Int16 | |
-| sup_id | Int64 | supplier ID |
-| wh_id | Int64 | warehouse ID |
-| data_json | Nullable(String) | |
-| is_sync | Int16 | |
-| time_sync | Int64 | |
-| recheck_stock | Int16 | |
-| var_queue | Nullable(String) | |
-| out_of_stock | Int16 | |
+| var_sync_ref | Int16 | 0=Chưa sync crossref; 1=đã sync crossref |
+| sup_id | Int64 | vendor |
+| wh_id | Int64 | warehouses id |
+| data_json | Nullable(String) | Data json lấy từ bên SSA |
+| is_sync | Int16 | 0=Chưa sync lại thông tin của SSA; 1=đã sync; 2=Không sync dùng cho mug, case, poster |
+| time_sync | Int64 | Time sync |
+| recheck_stock | Int16 | 0=không check stock; 1=cần check stock (dùng cho update stock status) |
+| var_queue | Nullable(String) | Hàng đợi bên Dreamjunction. A,B,C |
+| out_of_stock | Int16 | 0=Còn hàng; 1=hết hàng |
 | reorder | Int64 | |
-| temp_stock | Int64 | |
+| temp_stock | Int64 | số lượng còn lại tạm tính dựa trên order |
 | temp_stock2 | Int64 | |
-| var_buying | Int64 | |
+| var_buying | Int64 | Số lượng đang mua |
 | max_daily_sale | Int64 | |
-| sell_7_day | Int64 | sales last 7 days |
-| sell_14_day | Int64 | sales last 14 days |
-| sell_this_month | Int64 | sales this month |
-| sell_last_month | Int64 | sales last month |
-| last_modified | Int64 | |
-| is_adjust | Int16 | |
-| var_last_order_time | Int64 | |
-| var_default_casenumber | Int16 | |
-| location_id | Nullable(Int64) | |
-| cc_catalog_sku | Int64 | |
-| var_id_mapping | Int64 | |
-| var_case_qty | Int64 | |
-| var_report_basecost | Decimal(9,2) | base cost for reporting |
-| ssa_sync_failed | Int16 | |
-| var_ats | Int64 | available to sell |
+| sell_7_day | Int64 | Variant dùng trong 7 ngày gần nhất |
+| sell_14_day | Int64 | Variant dùng trong 14 ngày gần nhất |
+| sell_this_month | Int64 | Số variant bán trong vòng 30 ngày |
+| sell_last_month | Int64 | số variant bán trong tháng trước |
+| last_modified | Int64 | Lưu thời gian cron update |
+| is_adjust | Int16 | 0=Chưa cần điều chỉnh; 1=điều chỉnh từ mark out of stock; 2=điều chỉnh từ replenishment |
+| var_last_order_time | Int64 | Last order time, used for update variants stock replenishment |
+| var_default_casenumber | Int16 | Default case number for replenishment |
+| location_id | Nullable(Int64) | Location trong warehouse |
+| cc_catalog_sku | Int64 | Custom Cat Catalog sku |
+| var_id_mapping | Int64 | var_id mapping dành cho sản phẩm phụ |
+| var_case_qty | Int64 | create 24/09/2020: save qty in a case ssaw |
+| var_report_basecost | Decimal(9,2) | Giá nhập hàng (report) |
+| ssa_sync_failed | Int16 | Số lần sync no data từ ssa, 3 lần liên tục sẽ auto deactive |
+| var_ats | Int64 | Avaiable to sell: barcode-onorder+buying+ss |
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
@@ -1932,7 +1932,7 @@
 |---|---|---|
 | webhook_id | Int64 | PK |
 | webhook_name | Nullable(String) | |
-| webhook_topic | Int16 | event topic |
+| webhook_topic | Int16 | 1=order_completed; 2=order_canceled |
 | webhook_delivery_url | Nullable(String) | webhook URL |
 | cus_id | Int64 | FK → nh_customer |
 | store_id | UInt64 | FK → nh_store_integrations |
