@@ -64,13 +64,13 @@ Gates (cần Phuong confirm trước khi tiếp):
 > Quy tắc tránh drift giữa các file trong cùng một báo cáo.
 
 
-| File            | Source of truth cho                                 | Không lưu ở                   |
-| --------------- | --------------------------------------------------- | ----------------------------- |
-| `queries/*.sql` | Toàn bộ SQL — logic cuối cùng đã verified           | Inline trong `spec.md`        |
-| `changelog.md`  | Lịch sử thay đổi của báo cáo                        | Inline trong `spec.md`        |
-| `spec.md`       | Định nghĩa metric, dimensions, filters, phương pháp | Không nhân đôi sang file khác |
-| `exports/*.png` | PNG output cuối — overwrite khi re-export           | Không commit khi chưa final   |
-| `queries/*.csv` | Data cache từ MCP — giữ để tái sử dụng, debug      | Không commit (xem `.gitignore`) |
+| File            | Source of truth cho                                 | Không lưu ở                        |
+| --------------- | --------------------------------------------------- | ---------------------------------- |
+| `design.md`     | Metric definitions, dimensions, filters, caveats    | Không nhân đôi sang file khác      |
+| `queries/*.sql` | Toàn bộ SQL — logic cuối cùng đã verified           | Inline trong `design.md`           |
+| `changelog.md`  | Lịch sử thay đổi của báo cáo                        | Inline trong `design.md`           |
+| `exports/*.png` | PNG output cuối — overwrite khi re-export           | Không commit khi chưa final        |
+| `queries/*.csv` | Data cache từ MCP — giữ để tái sử dụng, debug      | Không commit (xem `.gitignore`)    |
 
 **CSV cache — khi nào cần re-query MCP:**
 - Date range thay đổi
@@ -130,9 +130,15 @@ reports/
 ├── _templates/
 │   ├── spec_template.md           # Template đặc tả báo cáo
 │   └── poc_template.ipynb         # Template notebook POC
+├── openspec/
+│   ├── config.yaml                # Project context + rules cho OpenSpec
+│   └── changes/
+│       └── <report-name>/
+│           ├── proposal.md        # What & why — audience, scope, gates
+│           ├── design.md          # Technical spec — metrics, SQL, caveats ⭐ đọc trước khi viết SQL
+│           └── tasks.md           # Next steps theo lifecycle gates
 └── reports/                       # Tất cả báo cáo — 1 subfolder per báo cáo
     └── <report-name>/             # kebab-case
-        ├── spec.md                # Đặc tả báo cáo
         ├── changelog.md           # Changelog của báo cáo này
         ├── queries/
         │   ├── main.sql           # Query chính — verified qua MCP
@@ -218,33 +224,38 @@ SELECT * FROM base ORDER BY month
 
 ### Khi làm việc với báo cáo hiện có
 
-1. Đọc `reports/<report-name>/spec.md` — xác định status hiện tại, làm việc đúng giai đoạn
-2. Không nhảy cóc giai đoạn — spec chưa confirmed thì không viết SQL
-3. Chạy SQL qua MCP để verify trước khi lưu vào `queries/`
-4. Ghi lại mọi thay đổi vào `reports/<report-name>/changelog.md` với đúng version
-5. Ghi entry tương ứng vào `docs/CHANGELOG.md`
+1. Đọc `openspec/changes/<name>/design.md` — source of truth cho metrics, SQL, filters, caveats
+   - Nếu change đã archive: đọc từ `openspec/archive/<name>/design.md`
+2. Đọc `openspec/changes/<name>/tasks.md` — xác định next steps và gate hiện tại
+3. Không nhảy cóc gate — cần Phuong confirm trước khi tiếp
+4. Chạy SQL qua MCP để verify trước khi lưu vào `reports/<name>/queries/`
+5. Ghi lại mọi thay đổi vào `reports/<name>/changelog.md`
+6. Ghi entry tương ứng vào `docs/CHANGELOG.md`
 
 ### Khi tạo báo cáo mới
 
-1. Tạo folder mới trong `reports/` theo kebab-case
-2. Copy từ `_templates/spec_template.md` → `reports/<report-name>/spec.md`
-3. Copy từ `_templates/poc_template.ipynb` → `reports/<report-name>/poc.ipynb`
-4. Tạo `reports/<report-name>/changelog.md` rỗng
-5. Tạo folder `reports/<report-name>/queries/`
+Dùng `/opsx:propose` — Claude sẽ tạo artifacts tự động.
+
+Nếu tạo thủ công:
+1. Chạy `openspec new change "<report-name>"` để tạo change folder + artifacts
+2. Điền `openspec/changes/<name>/proposal.md` — audience, key question, success criteria
+3. Điền `openspec/changes/<name>/design.md` — metrics, data source, SQL approach (dùng `_templates/spec_template.md` làm reference)
+4. Điền `openspec/changes/<name>/tasks.md` — checklist theo lifecycle gates
+5. Tạo `reports/<name>/` với: `queries/`, `changelog.md`, `poc.ipynb` (copy từ `_templates/poc_template.ipynb`)
 6. **Cập nhật bảng "Danh Sách Báo Cáo" trong file CLAUDE.md này**
 
 ### Khi viết SQL
 
-1. **Đọc `docs/schema.md`** — xác định database/table nào cần dùng
-2. **Đọc `docs/data-map.md`** — nếu query join nhiều database: xem entity map (Section 2) + join paths (Section 3) trước khi viết
-3. **Đọc `docs/schema/<database>.md`** — xem đúng tên columns, types trước khi viết
-4. **Chỉ gọi MCP list/explore schema** khi database chưa có file trong `docs/schema/` hoặc cần refresh (xem flow bên dưới)
-5. Kiểm tra spec: dimensions, metrics, filters cần gì
+1. **Đọc `openspec/changes/<name>/design.md`** — xác định table, columns, metric formulas, filters, caveats
+2. **Đọc `docs/schema.md`** — xác định database nào cần dùng
+3. **Đọc `docs/data-map.md`** — nếu query join nhiều database: xem entity map + join paths
+4. **Đọc `docs/schema/<database>.md`** — xem đúng tên columns, types
+5. **Chỉ gọi MCP list/explore schema** khi database chưa có file trong `docs/schema/` hoặc cần refresh
 6. Xử lý **toàn bộ** logic trong SQL — không để lại gì cho Python
 7. Dùng CTE cho query phức tạp
 8. Chú ý ClickHouse-specific syntax (xem mục Quy Ước SQL bên trên)
 9. Verify qua MCP (`run_select_query`) trước khi lưu file
-10. **Nếu dùng join path mới chưa có trong `docs/data-map.md`** → cập nhật Section 3 sau khi verify thành công (ghi "Verified by: `<report-name> <date>`")
+10. **Nếu dùng join path mới chưa có trong `docs/data-map.md`** → cập nhật Section 3 sau khi verify thành công
 
 ### Khi explore / refresh schema một database
 

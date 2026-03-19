@@ -16,6 +16,7 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 ## 2026-03
 
 ### Setup
+- [2026-03-19] Migrate spec.md → openspec/changes/design.md, xóa reports/spec.md, update CLAUDE.md flow
 - [2026-03-19] Migrate workflow sang OpenSpec: config.yaml, changes/order-performance/, gọn CLAUDE.md ~50%
 - [2026-03-13] Khởi tạo dự án: thư mục, templates, CLAUDE.md
 - [2026-03-16] Restructure: gom báo cáo vào `reports/`, cập nhật CLAUDE.md + README
