@@ -22,7 +22,7 @@ Payment ────────────────────────
 | **Tracking Active Lead** | paid → first scan | KPI chính — customer perspective |
 | **Production Time** | paid → fulfilled (ready) | Component — GEA internal, quan trọng ngang Tracking Lag |
 | **Tracking Lag** | fulfilled → first scan | Component — carrier pickup, quan trọng ngang Production Time |
-| **SLA Compliance Rate** | % đơn đạt trong SLA_TARGET | Benchmark vs thị trường |
+| **SLA Compliance Rate** | % đơn đạt trong SLA target từng sàn | Benchmark vs thị trường |
 
 > **Production Time — định nghĩa chính xác:** `fulfilled` = đơn đã sản xuất xong + đóng gói + sẵn sàng để bàn giao. Chưa phải lúc carrier thực sự đến lấy. Không dùng "bàn giao cho carrier" để tránh nhầm với first scan.
 
@@ -251,11 +251,37 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 
 ---
 
-## SLA Benchmark Research (pending)
+## SLA Benchmark (verified 2026-03-19)
 
-Priority: TikTok Shop → Amazon → eBay → Etsy → Shopify
+| Platform | SLA (paid → first scan) | "Shipped" = | Penalty threshold | Risk GEA |
+|---|---|---|---|---|
+| **TikTok Shop US** | **2 BD** | First carrier scan | LDR >4% phạt, >10% suspend; auto-cancel >5 BD | **HIGH** |
+| **Amazon FBM** | **1–2 BD** (default, configurable) | Seller Central confirm + first scan | LSR >4% deactivation risk | **MEDIUM** |
+| **eBay US** | Seller-set (recommend ≤2 BD) | First carrier scan | LSR >3% mất Top Rated | **LOW** |
+| **Etsy US** | Seller-set processing time | Marked shipped in dashboard | On-time <80% account risk | **LOW** |
 
-Khi có SLA target → update `SLA_TARGET` trong SLA Compliance Rate formula + re-query.
+**GEA thực tế (Standard US, Jan–Feb 2026, n=9,965):**
+
+| Threshold | % đạt | Đánh giá |
+|---|---|---|
+| ≤2 BD (TikTok Shop / Amazon default) | **37.1%** | ⚠️ 62.9% vi phạm SLA |
+| ≤3 BD | 66.3% | — |
+| ≤5 BD (eBay/Etsy safe zone) | **95.6%** | ✓ An toàn |
+
+P50 = **2.42 BD**, P90 = **4.37 BD**
+
+- **TikTok Shop: CRITICAL** — chỉ 37.1% đơn đạt SLA 2 BD. Auto-cancel risk với ~4.4% orders (>5 BD)
+- **Amazon FBM:** Nếu set handling time ≥3 BD trong listing → trong SLA
+- **eBay/Etsy:** 95.6% within 5 BD → an toàn với cả hai sàn
+
+**SLA Compliance Rate formulas:**
+```sql
+-- TikTok Shop / Amazon default (2 BD)
+countIf(processing_day + first_scan_day <= 2) / count()
+
+-- eBay / Etsy safe zone (5 BD)
+countIf(processing_day + first_scan_day <= 5) / count()
+```
 
 ---
 

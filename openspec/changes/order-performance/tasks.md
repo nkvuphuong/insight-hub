@@ -9,10 +9,10 @@ Gates: `poc-done` → `biz-validated` → `production`
 
 > Cần hoàn thành trước khi confirm biz-validated.
 
-- [ ] **T0a** — Research TikTok Shop SLA: paid → tracking active (bao nhiêu ngày cam kết với seller?)
-- [ ] **T0b** — Research SLA các sàn POD liên quan: Amazon, eBay, Etsy (priority theo volume GEA)
-- [ ] **T0c** — Claude: Update `design.md` với SLA target sau khi có số — thêm vào SLA Compliance Rate formula
-- [ ] **T0d** — Claude: Re-query MCP với SLA target mới, tính SLA Compliance Rate cho GEA (Standard US, Jan–Feb 2026)
+- [x] **T0a** — Research TikTok Shop SLA: paid → tracking active (bao nhiêu ngày cam kết với seller?)
+- [x] **T0b** — Research SLA các sàn POD liên quan: Amazon, eBay, Etsy (priority theo volume GEA)
+- [x] **T0c** — Claude: Update `design.md` với SLA target sau khi có số — thêm vào SLA Compliance Rate formula
+- [x] **T0d** — Claude: Re-query MCP với SLA target mới, tính SLA Compliance Rate cho GEA (Standard US, Jan–Feb 2026)
 
 ## Gate 1: poc-done → biz-validated
 
