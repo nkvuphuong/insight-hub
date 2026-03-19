@@ -1,6 +1,6 @@
 """
 Order Performance — Static PNG Export
-Spec: spec.md v0.6  |  Scope: Jan–Feb 2026, US
+Design: openspec/changes/order-performance/design.md  |  Scope: Jan–Feb 2026, US
 Run: python3 export.py  (from order-performance/ directory)
 Output: exports/
 """
@@ -32,6 +32,7 @@ _CSV_MAP = {
     "queries/kpi.csv":      "kpi.sql      → queries/kpi.csv",
     "queries/segment.csv":  "segment.sql  → queries/segment.csv",
     "queries/cdf.csv":      "cdf.sql      → queries/cdf.csv",
+    "queries/sla.csv":      "sla.sql      → queries/sla.csv",
 }
 _missing = [f for f in _CSV_MAP if not os.path.exists(f)]
 if _missing:
@@ -51,9 +52,11 @@ kpi = pd.read_csv("queries/kpi.csv").iloc[0]
 seg = pd.read_csv("queries/segment.csv")
 seg_clean = seg[seg["facility"] != "Unknown"].copy()
 cdf = pd.read_csv("queries/cdf.csv").iloc[0]
+sla = pd.read_csv("queries/sla.csv")
+sla_clean = sla[sla["facility"] != "Unknown"].copy().sort_values("tiktok_sla_pct")
 
 n_orders = int(kpi["orders"])
-print(f"KPI: {n_orders:,} orders | Segment: {len(seg)} rows")
+print(f"KPI: {n_orders:,} orders | Segment: {len(seg)} rows | SLA: {len(sla)} rows")
 
 
 def save(fig, name):
@@ -245,7 +248,53 @@ save(fig, "06_scan_rate_by_segment.png")
 
 
 # ---------------------------------------------------------------------------
-# Dashboard — composite: Row1=2col, Row2=3col, Row3=2col, Row4=note
+# Chart 7 — TikTok Shop SLA Compliance by Facility × Shipping Class
+# ---------------------------------------------------------------------------
+sla_clean["label"] = sla_clean["facility"] + "\n" + sla_clean["shipping_class"]
+
+TIKTOK_SLA = 2  # BD
+C_SLA_BAD  = "#d62728"
+C_SLA_MID  = "#ff7f0e"
+C_SLA_GOOD = "#2ca02c"
+
+def sla_color(pct):
+    if pct < 30:   return C_SLA_BAD
+    if pct < 60:   return C_SLA_MID
+    return C_SLA_GOOD
+
+bar_colors = [sla_color(v) for v in sla_clean["tiktok_sla_pct"]]
+
+fig, ax = plt.subplots(figsize=(12, 5))
+bars = ax.bar(sla_clean["label"], sla_clean["tiktok_sla_pct"],
+              color=bar_colors, alpha=0.9)
+for bar, row in zip(bars, sla_clean.itertuples()):
+    ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
+            f"{row.tiktok_sla_pct:.1f}%\n(n={row.total_orders:,})",
+            ha="center", va="bottom", fontsize=9)
+
+ax.axhline(100, color="#aaa", linewidth=1, linestyle="--", label="100% target")
+ax.set_title(f"TikTok Shop SLA Compliance — by Facility × Shipping Class  ({SCOPE})\n"
+             f"% orders with Tracking Active Lead ≤ {TIKTOK_SLA} BD (TikTok Shop SLA requirement)",
+             fontsize=13, fontweight="bold")
+ax.set_ylabel("% Orders within TikTok SLA")
+ax.yaxis.set_major_formatter(pct_fmt)
+ax.set_ylim(0, 130)
+ax.legend(fontsize=9)
+ax.grid(axis="y", linestyle="--", alpha=0.4)
+
+from matplotlib.patches import Patch
+legend_elements = [
+    Patch(facecolor=C_SLA_BAD,  label="< 30%  — Critical"),
+    Patch(facecolor=C_SLA_MID,  label="30–60% — At risk"),
+    Patch(facecolor=C_SLA_GOOD, label="> 60%  — Acceptable"),
+]
+ax.legend(handles=legend_elements, fontsize=9, loc="upper left")
+plt.tight_layout()
+save(fig, "07_tiktok_sla_compliance.png")
+
+
+# ---------------------------------------------------------------------------
+# Dashboard — composite: Row1=2col, Row2=3col, Row3=2col, Row4=SLA, Row5=note
 # ---------------------------------------------------------------------------
 seg_clean["label"] = seg_clean["facility"] + "\n" + seg_clean["shipping_class"]
 norm_clean   = plt.Normalize(seg_clean["pct_scan_within_1d"].min(), seg_clean["pct_scan_within_1d"].max())
@@ -255,12 +304,12 @@ n_cls_c      = len(classes_c)
 bar_w_c      = 0.7 / n_cls_c
 x_fac_c      = range(len(facilities_c))
 
-fig = plt.figure(figsize=(22, 18))
+fig = plt.figure(figsize=(22, 24))
 fig.suptitle(f"Order Performance Dashboard  ·  {SCOPE}  ·  n = {n_orders:,} orders",
              fontsize=16, fontweight="bold", y=0.99)
 
-gs = GridSpec(4, 6, figure=fig, hspace=0.5, wspace=0.4,
-              height_ratios=[1.2, 1.2, 1.2, 0.35])
+gs = GridSpec(5, 6, figure=fig, hspace=0.5, wspace=0.4,
+              height_ratios=[1.2, 1.2, 1.2, 1.2, 0.35])
 
 # --- Row 1: KPI card (left) + Breakdown bar (right) ---
 ax1 = fig.add_subplot(gs[0, :3])
@@ -357,14 +406,33 @@ ax6.set_title("Same-day Scan Rate by Segment\n(% orders 1st-scanned ≤1 biz day
 ax6.set_ylabel("% Orders"); ax6.yaxis.set_major_formatter(pct_fmt); ax6.set_ylim(0, 130)
 ax6.grid(axis="y", linestyle="--", alpha=0.4)
 
-# --- Row 4: Key Finding text panel ---
-ax_note = fig.add_subplot(gs[3, :])
+# --- Row 4: TikTok SLA Compliance by segment ---
+ax7 = fig.add_subplot(gs[3, :])
+bar_colors_d = [sla_color(v) for v in sla_clean["tiktok_sla_pct"]]
+bars7 = ax7.bar(sla_clean["label"], sla_clean["tiktok_sla_pct"],
+                color=bar_colors_d, alpha=0.9)
+for bar, row in zip(bars7, sla_clean.itertuples()):
+    ax7.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
+             f"{row.tiktok_sla_pct:.1f}%\n(n={row.total_orders:,})",
+             ha="center", va="bottom", fontsize=8)
+ax7.set_title(f"TikTok Shop SLA Compliance (≤2 BD) — by Facility × Shipping Class\n"
+              f"Root cause: HB1/HB2 Tracking Lag 1.88d vs TX1 0.96d (carrier pickup ×2 slower)",
+              fontsize=11, fontweight="bold")
+ax7.set_ylabel("% Orders within 2 BD SLA")
+ax7.yaxis.set_major_formatter(pct_fmt)
+ax7.set_ylim(0, 130)
+ax7.legend(handles=legend_elements, fontsize=8, loc="upper left")
+ax7.grid(axis="y", linestyle="--", alpha=0.4)
+
+# --- Row 5: Key Finding text panel ---
+ax_note = fig.add_subplot(gs[4, :])
 ax_note.axis("off")
 ax_note.set_facecolor("#fff8e1")
 finding_text = (
-    "KEY FINDING:  HB1 Standard (44% of volume) — Same-day scan rate 27% vs TX1 Standard 62%  (+35pp gap).  "
-    "Production time HB1 1.33d vs TX1 1.17d.  "
-    "▶  NEXT STEP: Investigate HB1 carrier pickup schedule & production flow."
+    "KEY FINDING:  TikTok Shop SLA (≤2 BD): overall 37.1%.  "
+    "HB1 Standard (50% of volume) 19.4%  vs  TX1 Standard 56.4%.  "
+    "Root cause: Tracking Lag HB1/HB2 = 1.88d vs TX1 = 0.96d (carrier pickup ×2 slower).  "
+    "▶  ACTION: Leadership — negotiate carrier pickup schedule at HB facilities."
 )
 ax_note.text(0.5, 0.5, finding_text,
              transform=ax_note.transAxes,
