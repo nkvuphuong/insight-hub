@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  Project: Reports POC workspace — verify SQL on ClickHouse, POC visualizations in Python before deploying to Metabase.
+
+  Tech stack:
+  - Data Warehouse: ClickHouse v25.0, accessed via MCP (mcp__clickhouse_cloud__*)
+  - Query: ClickHouse SQL dialect — ALL logic (filter, join, aggregate, metrics) must be in SQL
+  - Visualization: Python — Plotly (interactive POC), Matplotlib/Seaborn (static PNG)
+  - Notebook: Jupyter (.ipynb)
+  - Production BI: Metabase (SQL-only, no Python)
+
+  MCP defaults (always use, do not ask):
+  - Organization: DA's Organization
+  - Service: gea-data, ID: bf199f64-2a10-4ae7-bd03-56984eaf0158
+
+  Business systems:
+  - OMS: geadb__* (Order Management)
+  - WMS: gea_wms__* (Warehouse)
+  - FFM: gea_ffm__* (Fulfillment)
+  - POD: gea_seller__*, gea_iam__*, gea_finance__*, gea_store__*, gea_studio__*, gea_shipping__*
+  - Integrated: gea__* (double underscore), gea_silver, gea_gold
+
+  Schema docs:
+  - docs/schema.md — database index, read first
+  - docs/data-map.md — cross-DB join paths
+  - docs/schema/<database>.md — column details
+
+  Report lifecycle gates (Phuong must confirm each before proceeding):
+  discovery → draft → spec-confirmed → sql-verified → poc-done → biz-validated → production
+
+  Python NEVER: filter, join, aggregate, transform. Metabase runs pure SQL.
+
+rules:
+  proposal:
+    - Include: requestor, business audience, key question being answered, success criteria
+    - Include gate: biz-validated questions (who reads, SLA target, action owner, escalation workflow)
+  design:
+    - Include SQL approach: which tables, join paths, metric formulas, edge case handling
+    - Include data quality caveats specific to this dataset
+    - Reference docs/schema/<db>.md for column names
+  tasks:
+    - Tasks must follow lifecycle gates in order
+    - Each gate requires Phuong confirmation before next task starts
+    - Include MCP verification step for each SQL query

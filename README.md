@@ -49,7 +49,22 @@ df = pd.read_csv('queries/result.csv')
 
 Để export CSV từ MCP: yêu cầu Claude chạy query và save kết quả vào `queries/result.csv`.
 
+## Workflow (OpenSpec Commands)
+
+| Lệnh | Khi nào dùng |
+|------|-------------|
+| `/opsx:propose` | Tạo change mới (báo cáo mới hoặc thay đổi lớn) |
+| `/opsx:apply` | Implement tasks từ change |
+| `/opsx:archive` | Lưu trữ change đã hoàn thành |
+| `/opsx:explore` | Khám phá ý tưởng trước khi commit vào change |
+
+Gates: `discovery` → `draft` → `spec-confirmed` → `sql-verified` → `poc-done` → `biz-validated` → `production`
+
 ## Tạo Báo Cáo Mới
+
+Dùng `/opsx:propose` để tạo change — Claude sẽ tạo artifacts và folder structure tự động.
+
+Hoặc thủ công:
 
 ```bash
 mkdir -p reports/<report-name>/queries
