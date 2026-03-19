@@ -24,5 +24,6 @@
 | 2026-03-19 | v0.19   | Migrate sang OpenSpec: spec.md → openspec/changes/order-performance/design.md. Refocus key question: SLA benchmark TikTok Shop + how to improve. Action owner matrix (4 teams). |
 | 2026-03-19 | v0.20   | SLA research: TikTok Shop 2 BD, Amazon 1–2 BD, eBay/Etsy seller-set. GEA compliance: TikTok SLA 37.1% (CRITICAL), eBay/Etsy 95.6%. Root cause: HB1/HB2 Tracking Lag 1.88d vs TX1 0.96d. |
 | 2026-03-19 | v1.0    | Thêm queries/sla.sql + Chart 07 (TikTok SLA compliance by facility × shipping class). Dashboard updated với SLA row + key finding. biz-validated confirmed. Output: PNG/CSV + Metabase. |
+| 2026-03-19 | v1.1    | Redesign metric framework: từ 7+ charts → 2 metrics (SLA Compliance Rate + Component vs SLA Budget). Thêm Chart 08 (stacked Production + Tracking Lag vs SLA line). Dashboard redesign: 2-row executive view thay 5-row complex. Lý do: audience cần quyết định trong ≤30s. |
 
 

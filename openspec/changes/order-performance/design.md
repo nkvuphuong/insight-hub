@@ -15,15 +15,22 @@ Payment ────────────────────────
                   KPI chính — trải nghiệm của seller
 ```
 
-**Vai trò từng metric:**
-
+**Underlying measures:**
 
 | Metric                   | Đo cái gì                           | Vai trò                                                      |
 | ------------------------ | ----------------------------------- | ------------------------------------------------------------ |
 | **Tracking Active Lead** | paid → first scan                   | KPI chính — customer perspective                             |
 | **Production Time**      | paid → fulfilled (ready)            | Component — GEA internal, quan trọng ngang Tracking Lag      |
 | **Tracking Lag**         | fulfilled → first scan              | Component — carrier pickup, quan trọng ngang Production Time |
-| **SLA Compliance Rate**  | % đơn đạt trong SLA target từng sàn | Benchmark vs thị trường                                      |
+
+**Output — 2 metrics được báo cáo (≤30s decision):**
+
+| # | Metric | Câu hỏi trả lời | Chart |
+|---|--------|----------------|-------|
+| 1 | **SLA Compliance Rate** — % đơn ≤ 2 BD | Đang đạt TikTok Shop SLA không? | `07_tiktok_sla_compliance.png` |
+| 2 | **Component vs SLA Budget** — P50 Production + Tracking Lag stacked vs SLA line | Bottleneck ở component nào? | `08_stacked_vs_sla.png` |
+
+> Metric 3 (facility comparison) bị loại bỏ — không trả lời trực tiếp câu hỏi "cải thiện thế nào". HOW to improve là phân tích của action owner sau khi đọc 2 số trên.
 
 
 > **Production Time — định nghĩa chính xác:** `fulfilled` = đơn đã sản xuất xong + đóng gói + sẵn sàng để bàn giao. Chưa phải lúc carrier thực sự đến lấy. Không dùng "bàn giao cho carrier" để tránh nhầm với first scan.
@@ -181,15 +188,24 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 ## Visualizations (POC — poc-done)
 
 
-| Chart                             | Query         | Mục đích                                       |
-| --------------------------------- | ------------- | ---------------------------------------------- |
-| KPI card                          | `kpi.sql`     | P50/P90/Avg Active Lead + Same-day Scan Rate   |
-| Stacked bar ngang                 | `kpi.sql`     | Production vs Tracking Lag — tỷ lệ đóng góp    |
-| Production Time Distribution      | `cdf.sql`     | CDF curve — xưởng                              |
-| Tracking Lag Distribution         | `cdf.sql`     | CDF curve — carrier                            |
-| Tracking Active Lead Distribution | `cdf.sql`     | CDF curve — tổng                               |
-| Grouped bar — Production          | `segment.sql` | P50 Production Time: facility × shipping class |
-| Bar — Scan Rate                   | `segment.sql` | Same-day Scan Rate: facility × shipping class  |
+**Primary (dashboard `00_dashboard.png`):**
+
+| Chart | Query | Mục đích |
+|-------|-------|---------|
+| `07_tiktok_sla_compliance.png` | `sla.sql` | **Metric 1** — SLA Compliance Rate by facility × class |
+| `08_stacked_vs_sla.png`        | `sla.sql` | **Metric 2** — Stacked Production + Tracking Lag vs SLA line |
+
+**Supplementary (detail charts):**
+
+| Chart | Query | Mục đích |
+|-------|-------|---------|
+| `01_kpi_summary.png`        | `kpi.sql`     | P50/P90/Avg Active Lead snapshot |
+| `02_lead_breakdown.png`     | `kpi.sql`     | Production vs Tracking Lag breakdown |
+| `03_production_cdf.png`     | `cdf.sql`     | Production Time distribution |
+| `04_tracking_lag_cdf.png`   | `cdf.sql`     | Tracking Lag distribution |
+| `04b_active_lead_cdf.png`   | `cdf.sql`     | Tracking Active Lead distribution |
+| `05_production_by_segment.png` | `segment.sql` | P50 Production by facility × class |
+| `06_scan_rate_by_segment.png`  | `segment.sql` | Same-day Scan Rate by segment |
 
 
 ---
