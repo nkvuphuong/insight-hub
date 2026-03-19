@@ -17,18 +17,21 @@ Payment ────────────────────────
 
 **Vai trò từng metric:**
 
-| Metric | Đo cái gì | Vai trò |
-|--------|-----------|---------|
-| **Tracking Active Lead** | paid → first scan | KPI chính — customer perspective |
-| **Production Time** | paid → fulfilled (ready) | Component — GEA internal, quan trọng ngang Tracking Lag |
-| **Tracking Lag** | fulfilled → first scan | Component — carrier pickup, quan trọng ngang Production Time |
-| **SLA Compliance Rate** | % đơn đạt trong SLA target từng sàn | Benchmark vs thị trường |
+
+| Metric                   | Đo cái gì                           | Vai trò                                                      |
+| ------------------------ | ----------------------------------- | ------------------------------------------------------------ |
+| **Tracking Active Lead** | paid → first scan                   | KPI chính — customer perspective                             |
+| **Production Time**      | paid → fulfilled (ready)            | Component — GEA internal, quan trọng ngang Tracking Lag      |
+| **Tracking Lag**         | fulfilled → first scan              | Component — carrier pickup, quan trọng ngang Production Time |
+| **SLA Compliance Rate**  | % đơn đạt trong SLA target từng sàn | Benchmark vs thị trường                                      |
+
 
 > **Production Time — định nghĩa chính xác:** `fulfilled` = đơn đã sản xuất xong + đóng gói + sẵn sàng để bàn giao. Chưa phải lúc carrier thực sự đến lấy. Không dùng "bàn giao cho carrier" để tránh nhầm với first scan.
 
 > **SLA Target:** TikTok Shop SLA (cần research — xem tasks.md T0). Đề xuất tạm: 5 biz days (88.5% Standard US đạt trong POC data).
 
 > **Note về pre-calc columns (verified 2026-03-14):**
+>
 > - `processing_day` = paid → fulfilled, **business days** (loại bỏ overnight/weekend). P50 Standard US ≈ 1.1–1.4 biz days.
 > - `first_scan_day` = fulfilled → first scan, **business days**. P50 Standard US ≈ 0.6–1.1 biz days.
 > - `shipping_day` = fulfilled → delivered — **không dùng trong báo cáo này**.
@@ -41,16 +44,18 @@ Payment ────────────────────────
 **Primary table:** `gea__silver.fact_order_fulfillment_performance FINAL`
 **Data range:** Nov 2024 → nay
 
-| Column | Ý nghĩa |
-|--------|---------|
-| `paid_at_utc` | Thời điểm thanh toán |
-| `fulfilled_at` | Thời điểm fulfilled/shipped |
-| `first_scanned_at` | Thời điểm carrier scan lần đầu |
-| `processing_day` | Production Time: paid → fulfilled (pre-calc, **business days**) ⭐ |
-| `first_scan_day` | Tracking Lag: fulfilled → first scan (pre-calc, **business days**) ⭐ |
-| `shipping_class` | Standard / Ground / Fastship / Other / Stamp |
-| `ordx_fulfill_locate` | TX1 (Texas), HB1, HB2 (Huntington Beach) |
-| `country_code` | US (~95%), CA, GB, AU |
+
+| Column                | Ý nghĩa                                                              |
+| --------------------- | -------------------------------------------------------------------- |
+| `paid_at_utc`         | Thời điểm thanh toán                                                 |
+| `fulfilled_at`        | Thời điểm fulfilled/shipped                                          |
+| `first_scanned_at`    | Thời điểm carrier scan lần đầu                                       |
+| `processing_day`      | Production Time: paid → fulfilled (pre-calc, **business days**) ⭐    |
+| `first_scan_day`      | Tracking Lag: fulfilled → first scan (pre-calc, **business days**) ⭐ |
+| `shipping_class`      | Standard / Ground / Fastship / Other / Stamp                         |
+| `ordx_fulfill_locate` | TX1 (Texas), HB1, HB2 (Huntington Beach)                             |
+| `country_code`        | US (~95%), CA, GB, AU                                                |
+
 
 ---
 
@@ -64,13 +69,15 @@ Payment ────────────────────────
 
 ## Dimensions
 
-| Dimension | Column | Ví dụ | Ghi chú |
-|-----------|--------|-------|---------|
-| Tháng | `toStartOfMonth(paid_at_utc)` | 2025-01 | Granularity mặc định |
-| Tuần | `toStartOfWeek(paid_at_utc)` | 2025-W01 | Drill-down |
-| Shipping class | `shipping_class` | Standard, Fastship, Ground | Standard chiếm đa số |
-| Facility | `ordx_fulfill_locate` | TX1, HB1, HB2 | |
-| Quốc gia | `country_code` | US, CA, GB | Mặc định filter US |
+
+| Dimension      | Column                        | Ví dụ                      | Ghi chú              |
+| -------------- | ----------------------------- | -------------------------- | -------------------- |
+| Tháng          | `toStartOfMonth(paid_at_utc)` | 2025-01                    | Granularity mặc định |
+| Tuần           | `toStartOfWeek(paid_at_utc)`  | 2025-W01                   | Drill-down           |
+| Shipping class | `shipping_class`              | Standard, Fastship, Ground | Standard chiếm đa số |
+| Facility       | `ordx_fulfill_locate`         | TX1, HB1, HB2              |                      |
+| Quốc gia       | `country_code`                | US, CA, GB                 | Mặc định filter US   |
+
 
 ---
 
@@ -78,39 +85,45 @@ Payment ────────────────────────
 
 ### KPI Chính — Tracking Active Lead (paid → first scan)
 
-| Metric | Công thức | Unit |
-|--------|-----------|------|
-| **Median Tracking Active Lead** | `quantile(0.5)(processing_day + first_scan_day)` | biz days |
-| **P90 Tracking Active Lead** | `quantile(0.9)(processing_day + first_scan_day)` | biz days |
-| Avg Tracking Active Lead | `avg(processing_day + first_scan_day)` | biz days |
-| Order count | `count()` | orders |
-| % ≤ 1 day | `countIf(processing_day + first_scan_day <= 1) / count()` | % |
-| % ≤ 2 days | `countIf(processing_day + first_scan_day <= 2) / count()` | % |
-| % ≤ 3 days | `countIf(processing_day + first_scan_day <= 3) / count()` | % |
-| % ≤ 5 days | `countIf(processing_day + first_scan_day <= 5) / count()` | % |
-| % ≤ 7 days | `countIf(processing_day + first_scan_day <= 7) / count()` | % |
+
+| Metric                          | Công thức                                                 | Unit     |
+| ------------------------------- | --------------------------------------------------------- | -------- |
+| **Median Tracking Active Lead** | `quantile(0.5)(processing_day + first_scan_day)`          | biz days |
+| **P90 Tracking Active Lead**    | `quantile(0.9)(processing_day + first_scan_day)`          | biz days |
+| Avg Tracking Active Lead        | `avg(processing_day + first_scan_day)`                    | biz days |
+| Order count                     | `count()`                                                 | orders   |
+| % ≤ 1 day                       | `countIf(processing_day + first_scan_day <= 1) / count()` | %        |
+| % ≤ 2 days                      | `countIf(processing_day + first_scan_day <= 2) / count()` | %        |
+| % ≤ 3 days                      | `countIf(processing_day + first_scan_day <= 3) / count()` | %        |
+| % ≤ 5 days                      | `countIf(processing_day + first_scan_day <= 5) / count()` | %        |
+| % ≤ 7 days                      | `countIf(processing_day + first_scan_day <= 7) / count()` | %        |
+
 
 ### Thành phần 1 — Production Time (paid → fulfilled)
 
-| Metric | Công thức | Unit |
-|--------|-----------|------|
-| **Median Production Time** | `quantile(0.5)(processing_day)` | biz days |
-| **P90 Production Time** | `quantile(0.9)(processing_day)` | biz days |
-| CDF — % ≤ 1 day | `countIf(processing_day <= 1) / count()` | % |
-| CDF — % ≤ 2 days | `countIf(processing_day <= 2) / count()` | % |
-| CDF — % ≤ 3 days | `countIf(processing_day <= 3) / count()` | % |
-| CDF — % ≤ 5 days | `countIf(processing_day <= 5) / count()` | % |
+
+| Metric                     | Công thức                                | Unit     |
+| -------------------------- | ---------------------------------------- | -------- |
+| **Median Production Time** | `quantile(0.5)(processing_day)`          | biz days |
+| **P90 Production Time**    | `quantile(0.9)(processing_day)`          | biz days |
+| CDF — % ≤ 1 day            | `countIf(processing_day <= 1) / count()` | %        |
+| CDF — % ≤ 2 days           | `countIf(processing_day <= 2) / count()` | %        |
+| CDF — % ≤ 3 days           | `countIf(processing_day <= 3) / count()` | %        |
+| CDF — % ≤ 5 days           | `countIf(processing_day <= 5) / count()` | %        |
+
 
 ### Thành phần 2 — Tracking Lag (fulfilled → first scan)
 
-| Metric | Công thức | Unit |
-|--------|-----------|------|
-| **Median Tracking Lag** | `quantile(0.5)(first_scan_day)` | biz days |
-| **P90 Tracking Lag** | `quantile(0.9)(first_scan_day)` | biz days |
-| **Same-day Scan Rate** | `countIf(first_scan_day <= 1) / count()` | % |
-| CDF — % ≤ 0.5d (12h) | `countIf(first_scan_day <= 0.5) / count()` | % |
-| CDF — % ≤ 1d | `countIf(first_scan_day <= 1) / count()` | % |
-| CDF — % ≤ 2d | `countIf(first_scan_day <= 2) / count()` | % |
+
+| Metric                  | Công thức                                  | Unit     |
+| ----------------------- | ------------------------------------------ | -------- |
+| **Median Tracking Lag** | `quantile(0.5)(first_scan_day)`            | biz days |
+| **P90 Tracking Lag**    | `quantile(0.9)(first_scan_day)`            | biz days |
+| **Same-day Scan Rate**  | `countIf(first_scan_day <= 1) / count()`   | %        |
+| CDF — % ≤ 0.5d (12h)    | `countIf(first_scan_day <= 0.5) / count()` | %        |
+| CDF — % ≤ 1d            | `countIf(first_scan_day <= 1) / count()`   | %        |
+| CDF — % ≤ 2d            | `countIf(first_scan_day <= 2) / count()`   | %        |
+
 
 ---
 
@@ -120,6 +133,7 @@ Payment ────────────────────────
 Data thực tế right-skewed — Avg 4.57d >> P50 4.12d, P99 12.8d. Normal distribution cho kết quả sai lệch.
 
 **Phương pháp:**
+
 1. **Percentile (P50/P90)** — P50 = trải nghiệm điển hình, P90 = worst-case phổ biến (SLA-relevant)
 2. **CDF** — "88% đơn ship trong 5 ngày" — trực quan cho executive, dễ compare period/facility
 3. **Time-series trend** — P50 + P90 theo tháng, phát hiện deterioration sớm
@@ -152,47 +166,66 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 
 ## Query Files
 
-| File | Mục đích | Scope |
-|------|---------|-------|
-| `queries/kpi.sql` | Overall KPI snapshot | Jan–Feb 2026 |
-| `queries/segment.sql` | Breakdown by facility × shipping_class | Jan–Feb 2026 |
-| `queries/cdf.sql` | CDF breakpoints cho 3 metrics | Jan–Feb 2026 |
-| `queries/main.sql` | Time-series monthly (Metabase reference) | Nov 2024–nay |
+
+| File                  | Mục đích                                 | Scope        |
+| --------------------- | ---------------------------------------- | ------------ |
+| `queries/kpi.sql`     | Overall KPI snapshot                              | Jan–Feb 2026 |
+| `queries/segment.sql` | Breakdown by facility × shipping_class            | Jan–Feb 2026 |
+| `queries/cdf.sql`     | CDF breakpoints cho 3 metrics                     | Jan–Feb 2026 |
+| `queries/sla.sql`     | SLA Compliance Rate by facility × shipping_class  | Jan–Feb 2026 |
+| `queries/main.sql`    | Time-series monthly (Metabase reference)          | Nov 2024–nay |
+
 
 ---
 
 ## Visualizations (POC — poc-done)
 
-| Chart | Query | Mục đích |
-|-------|-------|---------|
-| KPI card | `kpi.sql` | P50/P90/Avg Active Lead + Same-day Scan Rate |
-| Stacked bar ngang | `kpi.sql` | Production vs Tracking Lag — tỷ lệ đóng góp |
-| Production Time Distribution | `cdf.sql` | CDF curve — xưởng |
-| Tracking Lag Distribution | `cdf.sql` | CDF curve — carrier |
-| Tracking Active Lead Distribution | `cdf.sql` | CDF curve — tổng |
-| Grouped bar — Production | `segment.sql` | P50 Production Time: facility × shipping class |
-| Bar — Scan Rate | `segment.sql` | Same-day Scan Rate: facility × shipping class |
+
+| Chart                             | Query         | Mục đích                                       |
+| --------------------------------- | ------------- | ---------------------------------------------- |
+| KPI card                          | `kpi.sql`     | P50/P90/Avg Active Lead + Same-day Scan Rate   |
+| Stacked bar ngang                 | `kpi.sql`     | Production vs Tracking Lag — tỷ lệ đóng góp    |
+| Production Time Distribution      | `cdf.sql`     | CDF curve — xưởng                              |
+| Tracking Lag Distribution         | `cdf.sql`     | CDF curve — carrier                            |
+| Tracking Active Lead Distribution | `cdf.sql`     | CDF curve — tổng                               |
+| Grouped bar — Production          | `segment.sql` | P50 Production Time: facility × shipping class |
+| Bar — Scan Rate                   | `segment.sql` | Same-day Scan Rate: facility × shipping class  |
+
 
 ---
 
 ## Key Findings (Jan–Feb 2026 snapshot)
 
-- P50 Tracking Active Lead: ~2.38 biz days
-- Tracking Lag (P50 1.31d) > Production Time (P50 1.16d) — carrier side chiếm nhiều hơn
-- HB1/HB2 Production Time cao hơn TX1
-- Same-day Scan Rate: HB1 Standard thấp nhất (27.8%)
+**Overall (Standard US):**
+- P50 Tracking Active Lead: 2.42 BD, P90: 4.37 BD
+- TikTok Shop SLA compliance (≤2 BD): **37.1%** — CRITICAL
+- eBay/Etsy SLA compliance (≤5 BD): 95.6% — an toàn
+
+**Breakdown by facility (sla.sql — sorted by TikTok SLA compliance):**
+
+| Facility | Shipping | Orders | TikTok SLA% | P50 Production | P50 Tracking Lag |
+|---|---|---|---|---|---|
+| HB2 | Standard | 113 | **9.7%** | 1.46d | 1.88d |
+| HB1 | Standard | 5,049 | **19.4%** | 1.33d | 1.88d |
+| TX1 | Standard | 4,797 | **56.4%** | 1.17d | 0.96d |
+| TX1 | Ground | 1,026 | 60.6% | 0.54d | 1.00d |
+| TX1 | Fastship | 291 | 60.5% | 0.50d | 1.00d |
+
+**Root cause:** Tracking Lag tại HB1/HB2 = 1.88d — **gấp đôi TX1 (0.96d)**. Carrier pickup tại HB facilities là bottleneck chính. Production Time giữa các facility tương đối đồng đều (1.17–1.46d).
 
 ---
 
 ## Open Questions
 
-| # | Câu hỏi | Status |
-|---|---------|--------|
-| 1 | "Completed date" = `fulfilled_at`? | ✅ Confirmed |
-| 2 | SLA target là bao nhiêu ngày? | 🔲 Backlog |
-| 3 | Bỏ Aug–Oct 2025 hay investigate/fix? | ✅ Bỏ |
-| 4 | Breakdown theo platform (Shopify, Etsy...)? | ✅ Chưa cần |
-| 5 | Fastship có SLA/target riêng không? | ✅ Backlog |
+
+| #   | Câu hỏi                                     | Status      |
+| --- | ------------------------------------------- | ----------- |
+| 1   | "Completed date" = `fulfilled_at`?          | ✅ Confirmed |
+| 2   | SLA target là bao nhiêu ngày?               | 🔲 Backlog  |
+| 3   | Bỏ Aug–Oct 2025 hay investigate/fix?        | ✅ Bỏ        |
+| 4   | Breakdown theo platform (Shopify, Etsy...)? | ✅ Chưa cần  |
+| 5   | Fastship có SLA/target riêng không?         | ✅ Backlog   |
+
 
 ---
 
@@ -202,71 +235,87 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 
 ### Mục đích & audience
 
-| # | Câu hỏi | Status |
-|---|---------|--------|
-| B1 | Monitor liên tục, review định kỳ, hay one-time? | 🔲 Chưa hỏi |
-| B2 | Ngoài BOD, ai khác đọc? (Ops manager, warehouse lead?) | 🔲 Chưa hỏi |
+
+| #   | Câu hỏi                                                | Status      |
+| --- | ------------------------------------------------------ | ----------- |
+| B1  | Monitor liên tục, review định kỳ, hay one-time?        | 🔲 Chưa hỏi |
+| B2  | Ngoài BOD, ai khác đọc? (Ops manager, warehouse lead?) | 🔲 Chưa hỏi |
+
 
 ### Charts & scope
 
-| # | Câu hỏi | Status |
-|---|---------|--------|
-| B3 | Cần filter tự chọn trên Metabase không? | 🔲 Chưa hỏi |
-| B4 | Cần so sánh 2 period trên cùng 1 chart không? | 🔲 Chưa hỏi |
+
+| #   | Câu hỏi                                       | Status      |
+| --- | --------------------------------------------- | ----------- |
+| B3  | Cần filter tự chọn trên Metabase không?       | 🔲 Chưa hỏi |
+| B4  | Cần so sánh 2 period trên cùng 1 chart không? | 🔲 Chưa hỏi |
+
 
 ### Định nghĩa "tốt/xấu" & SLA
 
-| # | Câu hỏi | Status |
-|---|---------|--------|
-| B5 | P50 Active Lead = 2.38 biz days, Same-day Scan Rate 45% — ổn hay có vấn đề? | 🔲 Chưa hỏi |
-| B6 | Có SLA cam kết với seller không? | 🔲 Chưa hỏi |
-| B7 | Có ngưỡng escalate cụ thể không? | 🔲 Chưa hỏi |
+
+| #   | Câu hỏi                                                                     | Status      |
+| --- | --------------------------------------------------------------------------- | ----------- |
+| B5  | P50 Active Lead = 2.38 biz days, Same-day Scan Rate 45% — ổn hay có vấn đề? | 🔲 Chưa hỏi |
+| B6  | Có SLA cam kết với seller không?                                            | 🔲 Chưa hỏi |
+| B7  | Có ngưỡng escalate cụ thể không?                                            | 🔲 Chưa hỏi |
+
 
 ### Impact & actionability
 
-| # | Câu hỏi | Status |
-|---|---------|--------|
-| B8 | Khi Production Time tăng / Tracking Lag cao: ai chịu trách nhiệm? | 🔲 Chưa hỏi |
-| B9 | Tracking Lag — GM có thể tác động được không? | 🔲 Chưa hỏi |
-| B10 | Sau khi xem dashboard, workflow tiếp theo là gì? | 🔲 Chưa hỏi |
+
+| #   | Câu hỏi                                                           | Status      |
+| --- | ----------------------------------------------------------------- | ----------- |
+| B8  | Khi Production Time tăng / Tracking Lag cao: ai chịu trách nhiệm? | 🔲 Chưa hỏi |
+| B9  | Tracking Lag — GM có thể tác động được không?                     | 🔲 Chưa hỏi |
+| B10 | Sau khi xem dashboard, workflow tiếp theo là gì?                  | 🔲 Chưa hỏi |
+
 
 ### Specific
 
-| # | Câu hỏi | Status |
-|---|---------|--------|
-| B11 | POC có 7 charts — scope production: giữ/bớt/bổ sung? | 🔲 Chưa hỏi |
-| B12 | Same-day Scan Rate 45% — vấn đề hay baseline? | 🔲 Chưa hỏi |
+
+| #   | Câu hỏi                                                 | Status      |
+| --- | ------------------------------------------------------- | ----------- |
+| B11 | POC có 7 charts — scope production: giữ/bớt/bổ sung?    | 🔲 Chưa hỏi |
+| B12 | Same-day Scan Rate 45% — vấn đề hay baseline?           | 🔲 Chưa hỏi |
 | B13 | Cần biết carrier cụ thể nào gây Tracking Lag cao không? | 🔲 Chưa hỏi |
+
 
 ---
 
 ## Action Owner Matrix
 
-| Metric xấu | Team | Lever |
-|---|---|---|
-| Production Time ↑ | Xưởng sản xuất | Tối ưu quy trình sản xuất, đóng gói, bàn giao cho carrier |
-| Tracking Lag ↑ (systemic) | Vận hành & Phát triển | Cải thiện background ops, handover process |
-| Tracking Lag ↑ (carrier/vendor) | Leadership cấp cao | Làm việc với carrier partners, giải quyết bottleneck khách quan |
-| Customer impact | CS & MKT | Hỗ trợ khách hàng xử lý khiếu nại sản xuất/vận chuyển |
+
+| Metric xấu                      | Team                  | Lever                                                           |
+| ------------------------------- | --------------------- | --------------------------------------------------------------- |
+| Production Time ↑               | Xưởng sản xuất        | Tối ưu quy trình sản xuất, đóng gói, bàn giao cho carrier       |
+| Tracking Lag ↑ (systemic)       | Vận hành & Phát triển | Cải thiện background ops, handover process                      |
+| Tracking Lag ↑ (carrier/vendor) | Leadership cấp cao    | Làm việc với carrier partners, giải quyết bottleneck khách quan |
+| Customer impact                 | CS & MKT              | Hỗ trợ khách hàng xử lý khiếu nại sản xuất/vận chuyển           |
+
 
 ---
 
 ## SLA Benchmark (verified 2026-03-19)
 
-| Platform | SLA (paid → first scan) | "Shipped" = | Penalty threshold | Risk GEA |
-|---|---|---|---|---|
-| **TikTok Shop US** | **2 BD** | First carrier scan | LDR >4% phạt, >10% suspend; auto-cancel >5 BD | **HIGH** |
-| **Amazon FBM** | **1–2 BD** (default, configurable) | Seller Central confirm + first scan | LSR >4% deactivation risk | **MEDIUM** |
-| **eBay US** | Seller-set (recommend ≤2 BD) | First carrier scan | LSR >3% mất Top Rated | **LOW** |
-| **Etsy US** | Seller-set processing time | Marked shipped in dashboard | On-time <80% account risk | **LOW** |
+
+| Platform           | SLA (paid → first scan)            | "Shipped" =                         | Penalty threshold                             | Risk GEA   |
+| ------------------ | ---------------------------------- | ----------------------------------- | --------------------------------------------- | ---------- |
+| **TikTok Shop US** | **2 BD**                           | First carrier scan                  | LDR >4% phạt, >10% suspend; auto-cancel >5 BD | **HIGH**   |
+| **Amazon FBM**     | **1–2 BD** (default, configurable) | Seller Central confirm + first scan | LSR >4% deactivation risk                     | **MEDIUM** |
+| **eBay US**        | Seller-set (recommend ≤2 BD)       | First carrier scan                  | LSR >3% mất Top Rated                         | **LOW**    |
+| **Etsy US**        | Seller-set processing time         | Marked shipped in dashboard         | On-time <80% account risk                     | **LOW**    |
+
 
 **GEA thực tế (Standard US, Jan–Feb 2026, n=9,965):**
 
-| Threshold | % đạt | Đánh giá |
-|---|---|---|
+
+| Threshold                            | % đạt     | Đánh giá             |
+| ------------------------------------ | --------- | -------------------- |
 | ≤2 BD (TikTok Shop / Amazon default) | **37.1%** | ⚠️ 62.9% vi phạm SLA |
-| ≤3 BD | 66.3% | — |
-| ≤5 BD (eBay/Etsy safe zone) | **95.6%** | ✓ An toàn |
+| ≤3 BD                                | 66.3%     | —                    |
+| ≤5 BD (eBay/Etsy safe zone)          | **95.6%** | ✓ An toàn            |
+
 
 P50 = **2.42 BD**, P90 = **4.37 BD**
 
@@ -275,6 +324,7 @@ P50 = **2.42 BD**, P90 = **4.37 BD**
 - **eBay/Etsy:** 95.6% within 5 BD → an toàn với cả hai sàn
 
 **SLA Compliance Rate formulas:**
+
 ```sql
 -- TikTok Shop / Amazon default (2 BD)
 countIf(processing_day + first_scan_day <= 2) / count()
@@ -290,3 +340,4 @@ countIf(processing_day + first_scan_day <= 5) / count()
 - Carrier dimension breakdown — thiếu dimension hiện tại
 - Weekly drill-down time-series
 - Period comparison (MoM overlay)
+

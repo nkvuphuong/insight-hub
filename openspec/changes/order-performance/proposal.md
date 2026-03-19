@@ -13,8 +13,9 @@ Mr. Sang Do (COO) — via Phuong
 2. **Làm thế nào để cải thiện?** — xác định bottleneck, giao đúng team chịu trách nhiệm
 
 ## Current Status
-`poc-done` — POC charts built and verified (Jan–Feb 2026 snapshot).
-Đang chờ: SLA research → biz-validated confirmation.
+`biz-validated` — SLA research done, confirmed proceed to production.
+Focus: TikTok Shop (2 BD SLA) — GEA hiện tại 37.1% compliance, CRITICAL gap.
+*Note: Mr. Sang Do official confirmation pending — có thể update scope sau.*
 
 ## Output
 **Không phải** self-serve dashboard cho stakeholder. Output là **analysis report** giao cho các team liên quan để phân tích và triển khai cải tiến.

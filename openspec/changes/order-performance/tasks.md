@@ -18,16 +18,17 @@ Gates: `poc-done` → `biz-validated` → `production`
 
 > Phuong confirm với Mr. Sang Do sau khi có SLA research.
 
-- [ ] **T1** — Confirm: GEA đang đạt / không đạt SLA target TikTok Shop? Gap cụ thể?
-- [ ] **T2** — Confirm: Action owner matrix phù hợp với org structure? (4 teams: Xưởng, Vận hành & PT, Leadership, CS & MKT)
-- [ ] **T3** — Phuong: Confirm biz-validated → status = `biz-validated`
+- [x] **T1** — Confirm: GEA đang đạt / không đạt SLA target TikTok Shop? Gap cụ thể?
+      *(Self-confirmed by Phuong — pending Mr. Sang Do official confirmation. Data: 37.1% đạt SLA 2 BD)*
+- [x] **T2** — Confirm: Action owner matrix phù hợp với org structure? (4 teams: Xưởng, Vận hành & PT, Leadership, CS & MKT)
+- [x] **T3** — Phuong: Confirm biz-validated → status = `biz-validated`
 
 ## Gate 2: biz-validated → production
 
 > Output: analysis report giao cho các team liên quan, không phải self-serve dashboard.
 
-- [ ] **T4** — Xác định format output: slide deck, PDF report, hay Metabase view chỉ cho internal?
-- [ ] **T5** — Claude: Build SQL cho SLA Compliance Rate với target đã confirm (`queries/sla.sql`)
+- [x] **T4** — Xác định format output: PNG/CSV cho presentation nhanh + Metabase cho ongoing monitoring
+- [x] **T5** — Claude: Build SQL cho SLA Compliance Rate với target đã confirm (`queries/sla.sql`)
 - [ ] **T6** — Claude: Update `poc.ipynb` / `export.py` — thêm SLA compliance chart, gap visualization
 - [ ] **T7** — Phuong: QA output — số liệu khớp POC? SLA gap rõ ràng?
 - [ ] **T8** — Distribute analysis report đến 4 teams (format theo T4)
