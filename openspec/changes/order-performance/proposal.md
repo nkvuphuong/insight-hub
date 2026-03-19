@@ -8,41 +8,36 @@ Mr. Sang Do (COO) — via Phuong
 - Secondary: Ops manager, warehouse leads (drill-down by facility)
 
 ## Key Question Being Answered
-**Seller mất bao lâu từ lúc thanh toán đến khi hàng có tracking active?**
 
-Broken into two components for internal monitoring:
-- Production Time (paid → fulfilled) — xưởng performance
-- Tracking Lag (fulfilled → first scan) — carrier performance
+1. **GEA đang ở đâu so với SLA thị trường?** — cụ thể TikTok Shop trước, sau đó các sàn POD lớn khác (Amazon, eBay, Etsy, Shopify)
+2. **Làm thế nào để cải thiện?** — xác định bottleneck, giao đúng team chịu trách nhiệm
 
 ## Current Status
-`poc-done` — POC charts built and verified (Jan–Feb 2026 snapshot). Awaiting business validation before Metabase.
+`poc-done` — POC charts built and verified (Jan–Feb 2026 snapshot).
+Đang chờ: SLA research → biz-validated confirmation.
+
+## Output
+**Không phải** self-serve dashboard cho stakeholder. Output là **analysis report** giao cho các team liên quan để phân tích và triển khai cải tiến.
 
 ## Success Criteria
-1. Leadership can answer: "What is our typical Tracking Active Lead time?"
-2. Ops can identify which facility/shipping class is underperforming
-3. Dashboard actionable: clear owner when metrics degrade
+1. Có SLA benchmark từ TikTok Shop (và các sàn POD liên quan)
+2. Biết GEA đang ở đâu so với benchmark — tốt hay xấu, gap bao nhiêu
+3. Xác định được bottleneck và giao đúng action owner
 
-## Pending Validation (biz-validated gate)
+## Action Owners
 
-### Mục đích & audience
-- B1: Monitor liên tục, review định kỳ, hay one-time?
-- B2: Ngoài BOD, ai khác đọc? (Ops manager, warehouse lead?)
+| Metric xấu | Team chịu trách nhiệm | Hành động |
+|---|---|---|
+| Production Time ↑ | **Xưởng sản xuất** | Tối ưu sản xuất, đóng gói, bàn giao carrier |
+| Tracking Lag ↑ (systemic) | **Vận hành & Phát triển** | Cải thiện background ops, handover process |
+| Tracking Lag ↑ (carrier/vendor) | **Leadership cấp cao** | Làm việc với carrier partners, giải quyết bottleneck khách quan |
+| Customer impact | **CS & MKT** | Hỗ trợ khách hàng xử lý khiếu nại về sản xuất/vận chuyển |
 
-### Charts & scope
-- B3: Cần filter tự chọn trên Metabase không?
-- B4: Cần so sánh 2 period trên cùng 1 chart không?
+## Validation Questions (simplified)
 
-### Định nghĩa "tốt/xấu" & SLA
-- B5: P50 Active Lead = 2.38 biz days, Same-day Scan Rate 45% — ổn hay có vấn đề?
-- B6: Có SLA cam kết với seller không?
-- B7: Có ngưỡng escalate cụ thể không?
-
-### Impact & actionability
-- B8: Khi Production Time tăng / Tracking Lag cao: ai chịu trách nhiệm?
-- B9: Tracking Lag — GM có thể tác động được không?
-- B10: Sau khi xem dashboard, workflow tiếp theo là gì?
-
-### Specific
-- B11: POC có 7 charts — confirm scope production (giữ nguyên / bớt / bổ sung)?
-- B12: Same-day Scan Rate 45% — vấn đề hay baseline?
-- B13: Cần biết carrier cụ thể nào gây Tracking Lag cao không?
+| # | Câu hỏi | Status |
+|---|---------|--------|
+| V1 | TikTok Shop SLA target là bao nhiêu ngày (paid → tracking active)? | 🔲 Cần research |
+| V2 | SLA các sàn POD khác (Amazon, eBay, Etsy)? | 🔲 Cần research |
+| V3 | GEA đang đạt / không đạt SLA target? Gap cụ thể? | 🔲 Sau khi có V1 |
+| V4 | Confirm action owner matrix phù hợp với org structure không? | 🔲 Chưa confirm |

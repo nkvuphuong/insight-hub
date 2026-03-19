@@ -1,32 +1,42 @@
-# Tasks: Order Performance — biz-validated → production
+# Tasks: Order Performance — poc-done → production
 
 Current status: `poc-done`
-Next gates: `biz-validated` → `production`
+Gates: `poc-done` → `biz-validated` → `production`
 
-## Gate: poc-done → biz-validated
+---
 
-> Phuong confirms với Mr. Sang Do trước khi tiếp.
+## Gate 0: SLA Research (prerequisite cho biz-validated)
 
-- [ ] **T1** — Phuong: Schedule review session với Mr. Sang Do để walk through POC charts
-- [ ] **T2** — Phuong: Thu thập câu trả lời cho B1–B13 (xem proposal.md)
-- [ ] **T3** — Claude: Cập nhật spec.md dựa trên câu trả lời (scope, SLA target, action owner)
-- [ ] **T4** — Phuong: Confirm spec đã cập nhật → status = `biz-validated`
+> Cần hoàn thành trước khi confirm biz-validated.
 
-## Gate: biz-validated → production (Metabase)
+- [ ] **T0a** — Research TikTok Shop SLA: paid → tracking active (bao nhiêu ngày cam kết với seller?)
+- [ ] **T0b** — Research SLA các sàn POD liên quan: Amazon, eBay, Etsy (priority theo volume GEA)
+- [ ] **T0c** — Claude: Update `design.md` với SLA target sau khi có số — thêm vào SLA Compliance Rate formula
+- [ ] **T0d** — Claude: Re-query MCP với SLA target mới, tính SLA Compliance Rate cho GEA (Standard US, Jan–Feb 2026)
 
-> Chỉ bắt đầu sau khi T4 done.
+## Gate 1: poc-done → biz-validated
 
-- [ ] **T5** — Xác định scope production final (charts nào giữ, bỏ, thêm)
-- [ ] **T6** — Nếu cần thêm/sửa chart: cập nhật spec → viết SQL → verify qua MCP → update queries/
-- [ ] **T7** — Build questions trên Metabase theo `queries/main.sql` (time-series) hoặc snapshot queries
-- [ ] **T8** — Phuong: QA Metabase dashboard — số liệu khớp POC?
-- [ ] **T9** — Claude: Cập nhật spec.md: status → `production`, điền Metabase link
-- [ ] **T10** — Claude: Ghi changelog.md (v1.0) + docs/CHANGELOG.md
+> Phuong confirm với Mr. Sang Do sau khi có SLA research.
+
+- [ ] **T1** — Confirm: GEA đang đạt / không đạt SLA target TikTok Shop? Gap cụ thể?
+- [ ] **T2** — Confirm: Action owner matrix phù hợp với org structure? (4 teams: Xưởng, Vận hành & PT, Leadership, CS & MKT)
+- [ ] **T3** — Phuong: Confirm biz-validated → status = `biz-validated`
+
+## Gate 2: biz-validated → production
+
+> Output: analysis report giao cho các team liên quan, không phải self-serve dashboard.
+
+- [ ] **T4** — Xác định format output: slide deck, PDF report, hay Metabase view chỉ cho internal?
+- [ ] **T5** — Claude: Build SQL cho SLA Compliance Rate với target đã confirm (`queries/sla.sql`)
+- [ ] **T6** — Claude: Update `poc.ipynb` / `export.py` — thêm SLA compliance chart, gap visualization
+- [ ] **T7** — Phuong: QA output — số liệu khớp POC? SLA gap rõ ràng?
+- [ ] **T8** — Distribute analysis report đến 4 teams (format theo T4)
+- [ ] **T9** — Claude: Ghi `reports/order-performance/changelog.md` (v1.0)
+- [ ] **T10** — Claude: Ghi `docs/CHANGELOG.md`
 - [ ] **T11** — Claude: Cập nhật bảng "Danh Sách Báo Cáo" trong CLAUDE.md
 
-## Backlog (nếu scope expand sau biz-validated)
+## Backlog (sau production nếu scope expand)
 
-- SLA Compliance Rate — cần confirm SLA target (đề xuất: 5 biz days = 88.5% Standard US)
-- Carrier dimension breakdown (thiếu data/dimension hiện tại)
-- Weekly drill-down time-series
-- Period comparison (MoM overlay)
+- Carrier breakdown — cần thêm dimension carrier vào data pipeline
+- MoM trend comparison
+- Extend SLA research sang CA, GB (markets GEA serve)

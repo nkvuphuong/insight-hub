@@ -17,6 +17,9 @@ Payment ────────────────────────
 | **Tracking Active Lead** | `processing_day + first_scan_day` | business days |
 | **Production Time** | `processing_day` | business days |
 | **Tracking Lag** | `first_scan_day` | business days |
+| **SLA Compliance Rate** | `countIf(processing_day + first_scan_day <= SLA_TARGET) / count()` | % |
+
+> **SLA Target:** TikTok Shop SLA (cần research — xem tasks.md T0). Đề xuất tạm: 5 biz days (88.5% Standard US đạt trong POC data).
 
 > **Note về pre-calc columns (verified 2026-03-14):**
 > - `processing_day` = paid → fulfilled, **business days** (loại bỏ overnight/weekend). P50 Standard US ≈ 1.1–1.4 biz days.
@@ -230,9 +233,27 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 
 ---
 
+## Action Owner Matrix
+
+| Metric xấu | Team | Lever |
+|---|---|---|
+| Production Time ↑ | Xưởng sản xuất | Tối ưu quy trình sản xuất, đóng gói, bàn giao cho carrier |
+| Tracking Lag ↑ (systemic) | Vận hành & Phát triển | Cải thiện background ops, handover process |
+| Tracking Lag ↑ (carrier/vendor) | Leadership cấp cao | Làm việc với carrier partners, giải quyết bottleneck khách quan |
+| Customer impact | CS & MKT | Hỗ trợ khách hàng xử lý khiếu nại sản xuất/vận chuyển |
+
+---
+
+## SLA Benchmark Research (pending)
+
+Priority: TikTok Shop → Amazon → eBay → Etsy → Shopify
+
+Khi có SLA target → update `SLA_TARGET` trong SLA Compliance Rate formula + re-query.
+
+---
+
 ## Backlog
 
-- SLA Compliance Rate — cần confirm SLA target (đề xuất: 5 biz days = 88.5% Standard US đạt)
 - Carrier dimension breakdown — thiếu dimension hiện tại
 - Weekly drill-down time-series
 - Period comparison (MoM overlay)
