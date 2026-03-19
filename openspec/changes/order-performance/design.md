@@ -3,21 +3,28 @@
 ## Metric Framework
 
 ```
-Payment ──────────────────────────────────────► First Scan (Tracking Active)
-         [  Production Time  ] [ Tracking Lag ]
-         paid → fulfilled      fulfilled → first scan
-         processing_day (d)    first_scan_day (d)  ← pre-calc in DB
+Payment ──────────────────────────────────────────────► First Scan
+         [     Production Time      ] [ Tracking Lag ]
+         paid → fulfilled              fulfilled → first scan
+         sản xuất + đóng gói           carrier pickup
+         = sẵn sàng bàn giao           (chưa phải đã bàn giao)
+         processing_day (biz days)     first_scan_day (biz days)
 
-         └──────────── Tracking Active Lead ──────────────┘
-              processing_day + first_scan_day  (additive, pre-calc)
+         └──────────── Tracking Active Lead ─────────────┘
+                  processing_day + first_scan_day
+                  KPI chính — trải nghiệm của seller
 ```
 
-| Metric | Column / Công thức | Unit |
-|--------|-------------------|------|
-| **Tracking Active Lead** | `processing_day + first_scan_day` | business days |
-| **Production Time** | `processing_day` | business days |
-| **Tracking Lag** | `first_scan_day` | business days |
-| **SLA Compliance Rate** | `countIf(processing_day + first_scan_day <= SLA_TARGET) / count()` | % |
+**Vai trò từng metric:**
+
+| Metric | Đo cái gì | Vai trò |
+|--------|-----------|---------|
+| **Tracking Active Lead** | paid → first scan | KPI chính — customer perspective |
+| **Production Time** | paid → fulfilled (ready) | Component — GEA internal, quan trọng ngang Tracking Lag |
+| **Tracking Lag** | fulfilled → first scan | Component — carrier pickup, quan trọng ngang Production Time |
+| **SLA Compliance Rate** | % đơn đạt trong SLA_TARGET | Benchmark vs thị trường |
+
+> **Production Time — định nghĩa chính xác:** `fulfilled` = đơn đã sản xuất xong + đóng gói + sẵn sàng để bàn giao. Chưa phải lúc carrier thực sự đến lấy. Không dùng "bàn giao cho carrier" để tránh nhầm với first scan.
 
 > **SLA Target:** TikTok Shop SLA (cần research — xem tasks.md T0). Đề xuất tạm: 5 biz days (88.5% Standard US đạt trong POC data).
 
