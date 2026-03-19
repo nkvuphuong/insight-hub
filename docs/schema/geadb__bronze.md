@@ -1,9 +1,9 @@
 # Schema: geadb__bronze
 
 **Layer:** Bronze (raw CDC từ production OMS database)
-**Last updated:** 2026-03-17
-**Tables:** 62 (bao gồm internal variants)
-**Main tables:** 59 (trừ `schema_migrations`)
+**Last updated:** 2026-03-19
+**Tables:** 64 (bao gồm internal variants)
+**Main tables:** 61 (trừ `schema_migrations`)
 
 > **Convention:** mỗi table có 3 variants: `<table>` (query trực tiếp + FINAL), `<table>__raw` (CDC raw, không query), `<table>__mv_to_latest` (MaterializedView populate vào latest, không query). Chỉ document main tables ở đây.
 >
@@ -45,6 +45,7 @@
 - `nh_tracking_shipments` — Tracking records (~10.2M rows)
 - `nh_tracking_shipment_events` — Tracking events (0 rows — empty)
 - `v_nh_tracking_shipments` — View: latest tracking (no FINAL needed, ~10.1M rows)
+- `nh_reality_tracking` — Carrier billing reality check: actual vs billed weight, charges (~8.1M rows)
 
 ### Nhóm Products & Campaigns
 - `nh_campaigns` — Campaigns (~3.5M rows)
@@ -90,6 +91,7 @@
 - `nh_material` — Materials (~12 rows)
 - `nh_print_type` — Print types (~24 rows)
 - `nh_shipping_profiles` — Shipping profiles (~17 rows)
+- `nh_shipping_zones` — Lookup: zipcode range → zone by country (~2.8K rows)
 - `nh_size_guide` — Size guides (~15 rows)
 - `nh_state` — States/provinces (~84 rows)
 
@@ -1344,6 +1346,46 @@
 
 ---
 
+### `nh_reality_tracking` 🔄
+> Engine: SharedReplacingMergeTree | Rows: ~8.1M
+> **Cần FINAL khi query**
+> Dữ liệu billing thực tế từ carrier: actual weight vs billed weight, charges, zone per shipment
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| rt_id | Int64 | PK |
+| tracking_id | String | Tracking number |
+| ord_id | Nullable(Int64) | FK → nh_order |
+| customer_reference_1 | Nullable(String) | Reference từ customer |
+| overlabelled_tracking_number | Nullable(String) | Tracking số đè nhãn |
+| actual_weight | Float32 | Cân nặng thực tế (lb) |
+| billed_weight | Float32 | Cân nặng tính phí (lb) |
+| billed_weight_in_lb | Nullable(String) | Cân nặng tính phí dạng text |
+| weight_type | Nullable(String) | Loại cân: actual / dimensional |
+| zone | Int16 | Shipping zone |
+| provider | String | Carrier provider (USPS, UPS...) |
+| type | String | Loại dịch vụ |
+| service | Nullable(String) | Service level |
+| processed_at | Nullable(DateTime64(0,'UTC')) | Thời điểm carrier xử lý |
+| manifest_date | Nullable(Date) | Ngày manifest |
+| package_charge | Decimal(20,2) | Phí gói hàng |
+| fuel_charge | Decimal(20,2) | Phí nhiên liệu |
+| total_charge | Nullable(Decimal(11,2)) | Tổng phí thực tế từ carrier |
+| destination_zip | Nullable(String) | Zip đích |
+| destination_city | Nullable(String) | City đích |
+| destination_state | Nullable(String) | State đích |
+| destination_country | Nullable(String) | Country đích |
+| rtq_id | UInt64 | FK → queue record |
+| ship_carrier | Nullable(String) | Carrier name |
+| ship_service | Nullable(String) | Service name |
+| created_at | DateTime64(0,'UTC') | |
+| updated_at | DateTime64(0,'UTC') | |
+| _processed_at | DateTime64(3,'UTC') | CDC metadata |
+| _action | String | CDC metadata |
+| _timestamp | DateTime64(3,'UTC') | CDC metadata |
+
+---
+
 ### `nh_rush_order_data` 🔄
 > Engine: SharedReplacingMergeTree | Rows: ~352K
 > **Cần FINAL khi query**
@@ -1481,6 +1523,26 @@
 | _processed_at | DateTime64(3,'UTC') | |
 | _action | String | |
 | _timestamp | DateTime64(3,'UTC') | |
+
+---
+
+### `nh_shipping_zones` 🔄
+> Engine: SharedReplacingMergeTree | Rows: ~2.8K
+> **Cần FINAL khi query**
+> Lookup: zipcode range → shipping zone, theo country
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| shz_id | Int64 | PK |
+| shz_zipcode_from | String | Zip đầu khoảng |
+| shz_zipcode_to | String | Zip cuối khoảng |
+| shz_zone | Int16 | Zone number |
+| country_code | String | Country code (US...) |
+| shz_created_at | DateTime64(0) | |
+| shz_updated_at | DateTime64(0) | |
+| _processed_at | DateTime64(3,'UTC') | CDC metadata |
+| _action | String | CDC metadata |
+| _timestamp | DateTime64(3,'UTC') | CDC metadata |
 
 ---
 

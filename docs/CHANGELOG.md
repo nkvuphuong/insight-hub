@@ -30,6 +30,7 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 - [2026-03-17] gea_wms__bronze: explore 60 tables, WMS domain (mới) → [gea_wms__bronze.md](./schema/gea_wms__bronze.md)
 - [2026-03-17] geadb__bronze: +2 tables (nh_creation_methods, nh_platforms), 57→59 → [geadb__bronze.md](./schema/geadb__bronze.md)
 - [2026-03-17] gea__silver: bổ sung column detail cho 9 views → [gea__silver.md](./schema/gea__silver.md)
+- [2026-03-19] geadb__bronze: +2 tables mới (nh_reality_tracking, nh_shipping_zones), 59→61 → [geadb__bronze.md](./schema/geadb__bronze.md)
 
 ### Reports
 - [2026-03-19] order-performance: v1.1 — redesign 2-metric framework (SLA Rate + Stacked), dashboard executive view → [changelog](../reports/order-performance/changelog.md)
