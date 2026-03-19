@@ -35,7 +35,7 @@ Payment ────────────────────────
 
 > **Production Time — định nghĩa chính xác:** `fulfilled` = đơn đã sản xuất xong + đóng gói + sẵn sàng để bàn giao. Chưa phải lúc carrier thực sự đến lấy. Không dùng "bàn giao cho carrier" để tránh nhầm với first scan.
 
-> **SLA Target:** TikTok Shop SLA (cần research — xem tasks.md T0). Đề xuất tạm: 5 biz days (88.5% Standard US đạt trong POC data).
+> **SLA Target (confirmed 2026-03-19):** TikTok Shop = 2 BD (paid → first carrier scan). GEA compliance: 37.1% — CRITICAL.
 
 > **Note về pre-calc columns (verified 2026-03-14):**
 >
@@ -141,10 +141,10 @@ Data thực tế right-skewed — Avg 4.57d >> P50 4.12d, P99 12.8d. Normal dist
 
 **Phương pháp:**
 
-1. **Percentile (P50/P90)** — P50 = trải nghiệm điển hình, P90 = worst-case phổ biến (SLA-relevant)
-2. **CDF** — "88% đơn ship trong 5 ngày" — trực quan cho executive, dễ compare period/facility
-3. **Time-series trend** — P50 + P90 theo tháng, phát hiện deterioration sớm
-4. **Segment comparison** — facility × shipping class, xác định outlier
+1. **SLA Compliance Rate** — % đơn ≤ SLA target, metric chính cho executive decision
+2. **Percentile (P50)** — median component breakdown per segment (stacked vs SLA budget)
+3. **Segment breakdown** — facility × shipping class để xác định bottleneck
+4. *Supplementary:* CDF distribution curves cho các component (production, tracking lag, active lead)
 
 ---
 
@@ -185,7 +185,7 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 
 ---
 
-## Visualizations (POC — poc-done)
+## Visualizations (v1.1)
 
 
 **Primary (dashboard `00_dashboard.png`):**
@@ -237,7 +237,7 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 | #   | Câu hỏi                                     | Status      |
 | --- | ------------------------------------------- | ----------- |
 | 1   | "Completed date" = `fulfilled_at`?          | ✅ Confirmed |
-| 2   | SLA target là bao nhiêu ngày?               | 🔲 Backlog  |
+| 2   | SLA target là bao nhiêu ngày?               | ✅ TikTok Shop = 2 BD (confirmed 2026-03-19) |
 | 3   | Bỏ Aug–Oct 2025 hay investigate/fix?        | ✅ Bỏ        |
 | 4   | Breakdown theo platform (Shopify, Etsy...)? | ✅ Chưa cần  |
 | 5   | Fastship có SLA/target riêng không?         | ✅ Backlog   |
@@ -245,57 +245,16 @@ Metabase filters (multi-select): shipping_class, ordx_fulfill_locate, date range
 
 ---
 
-## Business Questions (gate: poc-done → biz-validated)
+## Biz-Validated Gate (confirmed 2026-03-19)
 
-> Cần Phuong confirm với Mr. Sang Do. Xem next steps tại `tasks.md`.
+Gate đã passed. Kết quả confirm:
 
-### Mục đích & audience
-
-
-| #   | Câu hỏi                                                | Status      |
-| --- | ------------------------------------------------------ | ----------- |
-| B1  | Monitor liên tục, review định kỳ, hay one-time?        | 🔲 Chưa hỏi |
-| B2  | Ngoài BOD, ai khác đọc? (Ops manager, warehouse lead?) | 🔲 Chưa hỏi |
-
-
-### Charts & scope
-
-
-| #   | Câu hỏi                                       | Status      |
-| --- | --------------------------------------------- | ----------- |
-| B3  | Cần filter tự chọn trên Metabase không?       | 🔲 Chưa hỏi |
-| B4  | Cần so sánh 2 period trên cùng 1 chart không? | 🔲 Chưa hỏi |
-
-
-### Định nghĩa "tốt/xấu" & SLA
-
-
-| #   | Câu hỏi                                                                     | Status      |
-| --- | --------------------------------------------------------------------------- | ----------- |
-| B5  | P50 Active Lead = 2.38 biz days, Same-day Scan Rate 45% — ổn hay có vấn đề? | 🔲 Chưa hỏi |
-| B6  | Có SLA cam kết với seller không?                                            | 🔲 Chưa hỏi |
-| B7  | Có ngưỡng escalate cụ thể không?                                            | 🔲 Chưa hỏi |
-
-
-### Impact & actionability
-
-
-| #   | Câu hỏi                                                           | Status      |
-| --- | ----------------------------------------------------------------- | ----------- |
-| B8  | Khi Production Time tăng / Tracking Lag cao: ai chịu trách nhiệm? | 🔲 Chưa hỏi |
-| B9  | Tracking Lag — GM có thể tác động được không?                     | 🔲 Chưa hỏi |
-| B10 | Sau khi xem dashboard, workflow tiếp theo là gì?                  | 🔲 Chưa hỏi |
-
-
-### Specific
-
-
-| #   | Câu hỏi                                                 | Status      |
-| --- | ------------------------------------------------------- | ----------- |
-| B11 | POC có 7 charts — scope production: giữ/bớt/bổ sung?    | 🔲 Chưa hỏi |
-| B12 | Same-day Scan Rate 45% — vấn đề hay baseline?           | 🔲 Chưa hỏi |
-| B13 | Cần biết carrier cụ thể nào gây Tracking Lag cao không? | 🔲 Chưa hỏi |
-
+| Câu hỏi | Kết quả |
+|---------|---------|
+| Performance hiện tại? | TikTok SLA compliance 37.1% — CRITICAL |
+| Cải thiện thế nào? | Giảm Tracking Lag tại HB1/HB2 (carrier pickup ×2 chậm hơn TX1) |
+| Format output? | Analysis report (PNG/CSV) giao các team + Metabase monitoring |
+| Action owners? | 4 teams — xem Action Owner Matrix |
 
 ---
 
