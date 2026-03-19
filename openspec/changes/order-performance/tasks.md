@@ -30,11 +30,11 @@ Gates: `poc-done` → `biz-validated` → `production`
 - [x] **T4** — Xác định format output: PNG/CSV cho presentation nhanh + Metabase cho ongoing monitoring
 - [x] **T5** — Claude: Build SQL cho SLA Compliance Rate với target đã confirm (`queries/sla.sql`)
 - [x] **T6** — Claude: Update `poc.ipynb` / `export.py` — thêm SLA compliance chart, gap visualization
-- [ ] **T7** — Phuong: QA output — số liệu khớp POC? SLA gap rõ ràng?
+- [x] **T7** — Phuong: QA output — số liệu khớp POC? SLA gap rõ ràng?
 - [ ] **T8** — Distribute analysis report đến 4 teams (format theo T4)
-- [ ] **T9** — Claude: Ghi `reports/order-performance/changelog.md` (v1.0)
-- [ ] **T10** — Claude: Ghi `docs/CHANGELOG.md`
-- [ ] **T11** — Claude: Cập nhật bảng "Danh Sách Báo Cáo" trong CLAUDE.md
+- [x] **T9** — Claude: Ghi `reports/order-performance/changelog.md` (v1.0)
+- [x] **T10** — Claude: Ghi `docs/CHANGELOG.md`
+- [x] **T11** — Claude: Cập nhật bảng "Danh Sách Báo Cáo" trong CLAUDE.md
 
 ## Backlog (sau production nếu scope expand)
 
