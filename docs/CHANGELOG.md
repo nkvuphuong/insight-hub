@@ -33,6 +33,8 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 - [2026-03-19] geadb__bronze: +2 tables mới (nh_reality_tracking, nh_shipping_zones), 59→61 → [geadb__bronze.md](./schema/geadb__bronze.md)
 
 ### Reports
+- [2026-03-20] order-sla: poc-done (v0.3) — align Standard TAL formula: floor(sum) vs ceil+add, +10–30% pass rate → [changelog](../reports/order-sla/changelog.md)
+- [2026-03-20] order-sla: spec-confirmed → poc-done (v0.2) — Platform definition redesign, data correction (MCP partial count) → [changelog](../reports/order-sla/changelog.md)
 - [2026-03-19] order-performance: v1.1 — redesign 2-metric framework (SLA Rate + Stacked), dashboard executive view → [changelog](../reports/order-performance/changelog.md)
 - [2026-03-19] order-performance: biz-validated → v1.0 — SLA research, Chart 07, distribute → [changelog](../reports/order-performance/changelog.md)
 - [2026-03-13..16] order-performance: spec → sql-verified → poc-done (v0.1→v0.18) → [changelog](../reports/order-performance/changelog.md)

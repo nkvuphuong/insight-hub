@@ -192,6 +192,7 @@ SELECT * FROM base ORDER BY month
 | Folder                        | Tên               | Status   |
 | ----------------------------- | ----------------- | -------- |
 | `reports/order-performance/`  | Order Performance | biz-validated (v1.0) |
+| `reports/order-sla/`          | Order SLA         | poc-done (v0.2)      |
 
 
 *(Cập nhật bảng này mỗi khi thêm báo cáo mới)*

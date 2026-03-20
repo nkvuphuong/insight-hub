@@ -723,7 +723,7 @@ Cùng columns với `fact_production_order_sla_tracker`, thêm:
 ---
 
 #### `v__usps_fulfilled_to_first_scan_days` 🔵
-> View — USPS tracking lag: fulfilled → first carrier scan (calendar days)
+> View — USPS tracking lag: fulfilled → first carrier scan (**business days**)
 
 | Column | Type | Ghi chú |
 |---|---|---|
@@ -732,7 +732,7 @@ Cùng columns với `fact_production_order_sla_tracker`, thêm:
 | `tracking_number` | Nullable(String) | |
 | `fulfilled_time` | DateTime | thời điểm fulfill |
 | `first_scan_time` | DateTime64(3, 'UTC') | thời điểm scan đầu tiên |
-| `fulfilled_to_first_scan_days` | UInt32 | số ngày từ fulfilled → first scan ⭐ |
+| `fulfilled_to_first_scan_days` | UInt32 | số **business** days từ fulfilled → first scan ⭐ |
 
 ---
 
