@@ -1,9 +1,9 @@
 # Schema: gea__silver
 
 **Layer:** Silver (fact tables, dimensions, enriched từ geadb__bronze)
-**Last updated:** 2026-03-17
-**Tables:** 33 (bao gồm views và internal materialized views)
-**Main tables:** 29 (trừ 4 internal `mv__`* tables)
+**Last updated:** 2026-03-24
+**Tables:** 41 (bao gồm views và internal materialized views)
+**Main tables:** 37 (trừ 4 internal `mv__`* tables)
 
 ---
 
@@ -13,32 +13,39 @@
 
 - `dict_attribute` — attribute ID → quantity
 - `dict_exproduct` — external product ID → name, SKU
+- `dict_item_status` — item status code → business status *(mới, columns chưa explore)*
+- `dict_order_payment_method` — payment method code → name *(mới, columns chưa explore)*
 - `dict_order_status` — ord_status_custom → business status
 - `dict_payment_status` — payment_status → business status
+- `dict_platform` — platform lookup *(mới, columns chưa explore)*
+- `dict_platform_label` — method_insert_subtype → pla_id + business_status_name (4 rows: ebay, etsy, poshmark, tiktok)
 - `dict_product_type` — ordi_type → type_name
 
 ### Dimensions
 
 - `dim_business_day` — calendar of business days (~7.7K rows)
 - `dim_facility` — fulfill facilities (3 rows: US, VN, etc.)
+- `dim_item_status` — item status lookup (7 rows) *(mới, columns chưa explore)*
 - `dim_order_identity` — order ID mapping: OMS ID ↔ vendor_ref ↔ seller/store (~14.6M rows)
+- `dim_order_payment_method` — payment method lookup (4 rows) *(mới, columns chưa explore)*
 - `dim_order_status_mapping` — order status code → business status (16 rows)
 - `dim_payment_status_mapping` — payment status code → business status (4 rows)
+- `dim_platform_label` — platform label mapping (4 rows: ebay, etsy, poshmark, tiktok) *(mới)*
 - `dim_seller` — seller dimension (0 rows — empty)
 - `dim_time` — date dimension (~11.3K rows) ⭐
 - `dim_time_bd` — date dimension with business day sequence (~11.3K rows)
 
 ### Fact Tables
 
-- `fact_order` — enriched orders (0 rows — empty, replaced by fact_order_v1)
+- `fact_order` — enriched orders (0 rows — empty)
 - `fact_order_event` — order events / CDC-style events (0 rows — empty)
-- `fact_order_fulfillment_performance` — fulfillment SLA per order (~1.7M rows) ⭐
-- `fact_order_fulfillment_performance_by_product` — fulfillment SLA per order+product (~1.5M rows)
-- `fact_order_line` — order line items (0 rows — empty, replaced by v__fact_order_line)
-- `fact_order_v1` — active orders fact table (~14.5M rows) ⭐
-- `fact_order_v3` — V3 orders fact table (~80.5K rows)
-- `fact_production_order_sla_tracker` — live SLA tracker per order item (~1.3K rows)
-- `fact_production_order_sla_tracker_daily_snapshot` — daily snapshots of SLA (~228.6K rows)
+- `fact_order_fulfillment_performance` — fulfillment SLA per order (~1.73M rows) ⭐ — *+`is_platform` 2026-03-23*
+- `fact_order_fulfillment_performance_by_product` — fulfillment SLA per order+product (~1.5M rows) — *+`is_platform` 2026-03-23*
+- `fact_order_line` — order line items (0 rows — empty, dùng `v__fact_order_line` thay thế)
+- `fact_production_order_sla_tracker` — live SLA tracker per order item (~1.9K rows)
+- `fact_production_order_sla_tracker_daily_snapshot` — daily snapshots of SLA (~270K rows)
+
+> ⚠️ `fact_order_v1` và `fact_order_v3` không còn tồn tại trong ClickHouse (verified 2026-03-24).
 
 ### Views (không cần FINAL)
 
@@ -58,6 +65,7 @@
 - `mv__fact_order_fulfillment_performance_by_product` — MV populating by_product variant
 - `mv__fact_production_order_sla_tracker` — MV populating sla_tracker
 - `mv__g5000_dtg_campaign_2025` — MV for DTG campaign
+- `g5000_dtg_campaign_2025__mv` — backing table cho `v__g5000_dtg_campaign_2025` (~11.9K rows)
 
 ---
 
@@ -234,6 +242,38 @@
 | is_success           | UInt8  |                     |
 | is_failure           | UInt8  |                     |
 
+
+---
+
+### `dim_item_status` 🔵 *(mới — 2026-03-24)*
+
+> Engine: SharedMergeTree | Rows: 7
+> Item status lookup table
+
+*Columns chưa explore (system.columns không accessible cho bảng này)*
+
+---
+
+### `dim_order_payment_method` 🔵 *(mới — 2026-03-24)*
+
+> Engine: SharedMergeTree | Rows: 4
+> Payment method lookup table
+
+*Columns chưa explore (system.columns không accessible cho bảng này)*
+
+---
+
+### `dim_platform_label` 🔵 *(mới — 2026-03-24)*
+
+> Engine: SharedMergeTree | Rows: 4
+> Platform label mapping — dùng để identify TikTok, Etsy, eBay, Poshmark
+
+
+| Column                | Type   | Ghi chú                                              |
+| --------------------- | ------ | ---------------------------------------------------- |
+| method_insert_subtype | Int8   | PK (lookup key = method_insert_subtype từ orders)    |
+| pla_id                | Int8   | platform label ID                                    |
+| business_status_name  | String | platform name: 'ebay', 'etsy', 'poshmark', 'tiktok' |
 
 ---
 
@@ -431,9 +471,10 @@
 
 ### `fact_order_fulfillment_performance` 🔄 ⭐
 
-> Engine: SharedReplacingMergeTree | Rows: ~1.7M
+> Engine: SharedReplacingMergeTree | Rows: ~1.73M
 > **Cần FINAL khi query**
 > Fulfillment SLA tracking per order: paid → production → fulfilled → scanned → delivered
+> *2026-03-23: +`is_platform` (enrich-fact-ofp-platform); MV updated (join nh_order_source + COALESCE USPS tracking)*
 
 
 | Column                | Type                           | Ghi chú                                                                                                |
@@ -449,8 +490,8 @@
 | paid_at_local         | DateTime                       | payment time local                                                                                     |
 | production_at         | Nullable(DateTime)             | production start time                                                                                  |
 | fulfilled_at          | Nullable(DateTime)             | fulfillment (ship) time ⭐                                                                              |
-| first_scanned_at      | Nullable(DateTime)             | first carrier scan ⭐                                                                                   |
-| delivered_at          | Nullable(DateTime)             | delivery time ⭐                                                                                        |
+| first_scanned_at      | Nullable(DateTime)             | first carrier scan ⭐ — COALESCE(Standard tracking, Platform USPS tracking)                             |
+| delivered_at          | Nullable(DateTime)             | delivery time ⭐ — COALESCE(Standard tracking, Platform USPS tracking)                                  |
 | is_shifted_production | UInt8                          | 1 = production shifted to next business day                                                            |
 | processing_hour       | Nullable(Int16)                | Production Time in hours (paid → fulfilled, production-adjusted)                                       |
 | first_scan_hour       | Nullable(Int16)                | Tracking Lag in hours (fulfilled → first scan) ⭐                                                       |
@@ -459,6 +500,7 @@
 | first_scan_day        | Nullable(Float32)              | **Tracking Lag** (fulfilled → first scan, **business days**) ⭐                                         |
 | shipping_day          | Nullable(Float32)              | Transit time (fulfilled → delivered, calendar days = shipping_hour/24) — **không phải paid→fulfilled** |
 | updated_at            | DateTime64(3,'UTC')            |                                                                                                        |
+| **is_platform**       | **UInt8**                      | **🆕 1 = Platform order (is_label=1 trong nh_order_source), 0 = Standard** ⭐                           |
 
 
 ---
@@ -468,28 +510,30 @@
 > Engine: SharedReplacingMergeTree | Rows: ~1.5M
 > **Cần FINAL khi query**
 > Same as fact_order_fulfillment_performance but granularity = order + product_type
+> *2026-03-23: +`is_platform` (enrich-fact-ofp-by-product); MV updated (join nh_order_source + COALESCE USPS tracking)*
 
 
-| Column                | Type                   | Ghi chú             |
-| --------------------- | ---------------------- | ------------------- |
-| order_id              | UInt64                 | FK → nh_order       |
-| product_type          | LowCardinality(String) | product type name ⭐ |
-| ordx_fulfill_locate   | LowCardinality(String) |                     |
-| fulfill_timezone      | LowCardinality(String) |                     |
-| paid_at_utc           | DateTime('UTC')        |                     |
-| paid_at_local         | DateTime               |                     |
-| production_at         | Nullable(DateTime)     |                     |
-| is_shifted_production | UInt8                  |                     |
-| fulfilled_at          | Nullable(DateTime)     |                     |
-| first_scanned_at      | Nullable(DateTime)     |                     |
-| delivered_at          | Nullable(DateTime)     |                     |
-| processing_hour       | Nullable(Int32)        |                     |
-| first_scan_hour       | Nullable(Int32)        |                     |
-| shipping_hour         | Nullable(Int32)        |                     |
-| processing_day        | Nullable(Float32)      |                     |
-| first_scan_day        | Nullable(Float32)      |                     |
-| shipping_day          | Nullable(Float32)      |                     |
-| updated_at            | DateTime64(3,'UTC')    |                     |
+| Column                | Type                   | Ghi chú                                                    |
+| --------------------- | ---------------------- | ---------------------------------------------------------- |
+| order_id              | UInt64                 | FK → nh_order (sort key)                                   |
+| product_type          | LowCardinality(String) | product type name ⭐ (sort key)                             |
+| ordx_fulfill_locate   | LowCardinality(String) | fulfill location (sort key)                                |
+| fulfill_timezone      | LowCardinality(String) |                                                            |
+| paid_at_utc           | DateTime('UTC')        | partition key (toYYYYMM)                                   |
+| paid_at_local         | DateTime               |                                                            |
+| production_at         | Nullable(DateTime)     |                                                            |
+| is_shifted_production | UInt8                  | 1 = production shifted                                     |
+| fulfilled_at          | Nullable(DateTime)     |                                                            |
+| first_scanned_at      | Nullable(DateTime)     | COALESCE(Standard tracking, Platform USPS tracking)        |
+| delivered_at          | Nullable(DateTime)     | COALESCE(Standard tracking, Platform USPS tracking)        |
+| processing_hour       | Nullable(Int32)        |                                                            |
+| first_scan_hour       | Nullable(Int32)        |                                                            |
+| shipping_hour         | Nullable(Int32)        |                                                            |
+| processing_day        | Nullable(Float32)      |                                                            |
+| first_scan_day        | Nullable(Float32)      |                                                            |
+| shipping_day          | Nullable(Float32)      |                                                            |
+| updated_at            | DateTime64(3,'UTC')    | version key (ReplacingMergeTree)                           |
+| **is_platform**       | **UInt8**              | **🆕 1 = Platform order (is_label=1), 0 = Standard** ⭐    |
 
 
 ---

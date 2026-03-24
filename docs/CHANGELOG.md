@@ -32,6 +32,7 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 - [2026-03-17] gea__silver: bổ sung column detail cho 9 views → [gea__silver.md](./schema/gea__silver.md)
 - [2026-03-19] geadb__bronze: +2 tables mới (nh_reality_tracking, nh_shipping_zones), 59→61 → [geadb__bronze.md](./schema/geadb__bronze.md)
 - [2026-03-23] gea_silver: fix v_shipx_rate_comparison duplicate — SCD filter shipx phải ở WHERE, không ON → [gea_silver.md](./schema/gea_silver.md)
+- [2026-03-24] gea__silver: +is_platform vào fact_ofp + fact_ofp_by_product; +8 tables mới (dict/dim); fact_order_v1/v3 không còn tồn tại → [gea__silver.md](./schema/gea__silver.md)
 
 ### Reports
 - [2026-03-23] order-sla: sql-refactored (v0.4) — unified is_platform flag, bỏ v__usps_paided join → [changelog](../reports/order-sla/changelog.md)
