@@ -23,7 +23,17 @@ SLA thresholds: Platform ≤ 3, Standard ≤ 4 biz days.
 **Goals:**
 - Contribution split: avg `processing_day` vs `first_scan_day` theo product_type — identify bottleneck type
 - Pass rate breakdown: product_type × group — identify worst performers
-- Pass rate breakdown: `ordx_fulfill_locate` × group — identify facility bottleneck
+- Pass rate breakdown: facility × group — identify facility bottleneck
+- **[Added]** Facility × product_type cross-tab: avg_prod + avg_scan per facility — khép loop "xưởng nào bị + loại bottleneck nào + product nào"
+
+### D7: Facility grouping — HB1 + HB2 → CA
+
+HB1 và HB2 cùng quản lý bởi 1 ops lead (California). Gộp thành `CA` để align với cách ops report và prioritize. TX1 giữ nguyên.
+
+```sql
+CASE WHEN ordx_fulfill_locate IN ('HB1', 'HB2') THEN 'CA'
+     ELSE ordx_fulfill_locate END AS facility
+```
 
 **Non-Goals:**
 - Trend theo tháng (BOD đã có) — ops cần snapshot hiện tại, không cần historical
@@ -48,15 +58,44 @@ SLA thresholds: Platform ≤ 3, Standard ≤ 4 biz days.
 
 by_product có grain order × product_type. Một order có nhiều product_types → nhiều rows, SLA metrics (processing_day, first_scan_day) lặp lại cho từng product_type của cùng order. Aggregate bằng AVG và countIf theo product_type là đúng về nghiệp vụ (weight theo item mix).
 
-### D3: Period — 6 tháng gần nhất, không tách theo tháng
+### D3: Period — 1 tháng hoàn chỉnh gần nhất
 
-Ops cần snapshot hội tụ để identify pattern, không cần month-by-month granularity (BOD đã có trend). Filter: `paid_at_utc >= toStartOfMonth(now() - INTERVAL 6 MONTH)`.
+Ops cần phản ứng nhanh với vấn đề hiện tại, không phải pattern dài hạn (BOD đã có trend 12 tháng). Window ngắn giúp detect vấn đề mới phát sinh trong tháng.
 
-### D4: 3 queries độc lập
+Filter: `paid_at_utc >= toStartOfMonth(now() - INTERVAL 1 MONTH) AND paid_at_utc < toStartOfMonth(now())`
+
+*Trade-off accepted:* Một số product type ít đơn (Garden Flag ~160/tháng) có số liệu mỏng hơn — filter `order_count >= 100` ở visualization giảm thiểu nhiễu.
+
+### D4: 4 queries độc lập
 
 1. `ops_contribution.sql` — avg processing_day + first_scan_day per product_type, cả Platform và Standard
 2. `ops_product_breakdown.sql` — SLA pass rate per product_type, Platform và Standard
 3. `ops_location_breakdown.sql` — SLA pass rate per `ordx_fulfill_locate`, Platform và Standard
+4. `ops_facility_product.sql` — avg processing_day + avg first_scan_day per facility × product_type — drill-down L2→L3 sau khi L1 identify bottleneck facility
+
+### D6: Drill-down flow — 4 levels (high → detail)
+
+Ops workflow khi được escalate từ BOD:
+
+```
+L1 — Facility triage (Chart 3: location_breakdown)
+     TX1 healthy (benchmark) → no action
+     HB1/HB2 thấp → Priority: HB1 trước (volume 28–29%)
+          ↓
+L2 — Bottleneck type tại facility (Chart 4: facility_product)
+     avg_processing_day cao → production bottleneck
+     avg_first_scan_day cao → carrier handoff bottleneck
+          ↓
+L3 — Product priority (Chart 4 + Chart 2)
+     Production: Tumbler, Apparel
+     Carrier:    Doormat, Poster
+          ↓
+L4 — Action cụ thể
+     Production bottleneck → audit workflow tại facility đó cho product đó
+     Carrier bottleneck    → check fulfilled_at cutoff vs pickup window
+```
+
+**Chart 4 — `ops_facility_product`:** grouped bar per facility, x = product_type, y = avg_processing_day (stacked avg_first_scan_day), filter chỉ HB1/HB2/TX1. TX1 làm benchmark reference line.
 
 ### D5: TAL formula — kế thừa từ order-sla
 

@@ -194,6 +194,7 @@ SELECT * FROM base ORDER BY month
 | Folder                        | Tên               | Status   |
 | ----------------------------- | ----------------- | -------- |
 | `reports/order-sla/`          | Order SLA         | poc-done (v0.2)      |
+| `reports/ops-sla-drilldown/`  | Ops SLA Drilldown | spec-confirmed       |
 
 
 *(Cập nhật bảng này mỗi khi thêm báo cáo mới)*

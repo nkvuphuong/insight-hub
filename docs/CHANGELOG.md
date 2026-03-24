@@ -35,6 +35,7 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 - [2026-03-24] gea__silver: +is_platform vào fact_ofp + fact_ofp_by_product; +8 tables mới (dict/dim); fact_order_v1/v3 không còn tồn tại → [gea__silver.md](./schema/gea__silver.md)
 
 ### Reports
+- [2026-03-24] ops-sla-drilldown: poc-done (v0.1) — 4 charts, drill-down L1→L4, HB1/HB2 production bottleneck confirmed → [changelog](../reports/ops-sla-drilldown/changelog.md)
 - [2026-03-23] order-sla: sql-refactored (v0.4) — unified is_platform flag, bỏ v__usps_paided join → [changelog](../reports/order-sla/changelog.md)
 - [2026-03-24] enrich-fact-ofp-by-product: done — +is_platform + COALESCE USPS tracking timestamps cho fact_ofp_by_product → [tasks](../openspec/changes/enrich-fact-ofp-by-product/tasks.md)
 - [2026-03-23] enrich-fact-ofp-platform: Step 2 done — +COALESCE first_scanned_at/delivered_at từ USPS tracking cho Platform → [design](../openspec/changes/enrich-fact-ofp-platform/design.md)
