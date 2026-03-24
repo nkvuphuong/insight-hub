@@ -34,9 +34,7 @@ Gearment cam kết SLA với khách hàng dựa trên **Tracking Active Lead (TA
 ## Impact
 
 - **Data source:**
-  - `gea__silver.fact_order_fulfillment_performance` — production time + tracking lag (cả 2 nhóm)
-  - `gea__silver.v__usps_paided_to_first_scan_days` — TAL pre-computed cho Platform (USPS order labels)
-  - `gea__silver.v__usps_fulfilled_to_first_scan_days` — tracking lag cho Platform
+  - `gea__silver.fact_order_fulfillment_performance` — production time + tracking lag + `is_platform` flag (cả 2 nhóm)
 - **SLA thresholds (confirmed):** Platform ≤ 3 biz days, Standard ≤ 4 biz days, Rush ≤ 2 biz days (future)
 - **Output:** POC notebook (Plotly) + export PNG — phục vụ BU review và sau đó migrate lên Metabase
 - **Không ảnh hưởng:** Production pipeline, `order-performance` report, schema hiện có

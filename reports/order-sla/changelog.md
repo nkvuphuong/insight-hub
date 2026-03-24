@@ -1,5 +1,27 @@
 # Changelog — order-sla
 
+## v0.4 — 2026-03-23 — sql-refactored (unified fact source)
+
+### Summary
+Rewrite cả 2 SQL queries để dùng `is_platform` flag thay vì join `v__usps_paided_to_first_scan_days`. Unblock Gate 6 sau khi `enrich-fact-ofp-platform` hoàn tất.
+
+### Design change
+- **Standard:** Thay `LEFT ANTI JOIN v__usps_paided` → `WHERE is_platform = 0`. Đơn giản hơn, không còn dependency vào view phức tạp.
+- **Platform:** Thay join `v__usps_paided_to_first_scan_days` → `WHERE is_platform = 1 AND first_scan_day IS NOT NULL`. Formula TAL đổi từ `business_days_exclude_payment` → `floor(processing_day + first_scan_day)` (unified với Standard).
+
+### Verification
+- **Standard:** Numbers khớp v0.3 hoàn toàn (±1–4 orders, ±0.1% pass rate) ✓
+- **Platform:** total_orders khớp v0.3 (~±100 orders). Pass rate cao hơn +2–9% — expected do formula khác (`floor(sum)` vs `business_days_exclude_payment`). Trend direction nhất quán (Dec 2025 vẫn là đáy).
+
+### Files updated
+- `queries/sla_standard.sql` — `WHERE is_platform = 0`, bỏ LEFT ANTI JOIN, subquery pattern
+- `queries/sla_platform.sql` — `WHERE is_platform = 1`, `floor(processing_day + first_scan_day)`
+- `queries/sla_standard.csv` — re-cached v0.4
+- `queries/sla_platform.csv` — re-cached v0.4
+- `openspec/changes/order-sla/design.md` — D3 revised: unified fact source
+
+---
+
 ## v0.3 — 2026-03-20 — poc-done (Standard TAL formula correction)
 
 ### Summary

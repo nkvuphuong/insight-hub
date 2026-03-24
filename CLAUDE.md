@@ -167,6 +167,8 @@ reports/
 - **DateTime vs Date**: ClickHouse phân biệt rõ — cast đúng type tránh implicit conversion chậm
 - **LowCardinality**: cột string low-cardinality (status, category) thường được wrap — query nhanh hơn
 - CTE dùng `WITH ... AS (SELECT ...)` — standard, không dùng temp table
+- **JOIN type mismatch**: ClickHouse không tự cast signed/unsigned trong JOIN ON — luôn kiểm tra type của join key ở cả 2 bảng trước khi viết JOIN, cast tường minh nếu khác type (ví dụ: `toInt64(ord_id)` khi join Int64 với UInt64)
+- **Test CTE trước khi tạo MV**: trước khi chạy `CREATE MATERIALIZED VIEW`, copy phần `AS (SELECT ...)` ra chạy thử standalone để đảm bảo không có lỗi syntax hay type — tránh trường hợp DROP xong mới phát hiện lỗi
 
 ### Patterns
 

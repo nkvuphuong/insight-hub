@@ -356,6 +356,8 @@ Key columns: `shipment_id`, `tracking_code`, `status`, `quoted_amount`, `final_i
 ### v_shipx_rate_comparison
 **Engine:** View | **Mô tả:** So sánh rates giữa ShipX, EasyPost CA/TX, DHL ECS
 
+> **Caveat:** `shipx_rate_usps` là SCD Type 2 — filter `WHERE CurrentFlag = 'True' AND DeletedFlag = 'False'` phải nằm trong **WHERE clause** của view, không phải ON clause. Nếu để trong ON của LEFT JOIN, bảng trái không bị filter và output bị fanout ~17x (6163 rows thay vì 360 rows current).
+
 | Column | Type | Mô tả |
 |---|---|---|
 | _carrier | String | Carrier |

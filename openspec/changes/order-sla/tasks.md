@@ -34,7 +34,33 @@ Audience: BOD — ≤30s scan. 2 views thay vì 3 charts.
 
 ## 5. Biz Validation [gate: biz-validated]
 
-- [ ] 5.1 Chuẩn bị summary cho BOD: "Platform và Standard đang đạt SLA bao nhiêu %? Trend đang tốt lên hay xấu đi?"
+- [x] 5.1 Chuẩn bị summary cho BOD: "Platform và Standard đang đạt SLA bao nhiêu %? Trend đang tốt lên hay xấu đi?"
 - [ ] 5.2 BOD review — thu thập feedback: số liệu có phản ánh đúng thực tế không? Team propose internal target %?
 - [ ] 5.3 Ghi feedback từ BOD review vào `changelog.md`
 - [ ] 5.4 Điều chỉnh chart nếu có feedback — re-export PNG
+
+## 6. SQL Refactor [gate: sql-refactored — 2026-03-23 | depends: enrich-fact-ofp-platform]
+
+Đơn giản hóa SQL sau khi `fact_order_fulfillment_performance` đã có `is_platform` và `first_scan_day` đúng.
+
+- [x] 6.1 Rewrite `sla_standard.sql` — `WHERE is_platform = 0`, bỏ `LEFT ANTI JOIN v__usps_paided`
+- [x] 6.2 Rewrite `sla_platform.sql` — `WHERE is_platform = 1 AND first_scan_day IS NOT NULL`, dùng `floor(processing_day + first_scan_day)` thay vì join `v__usps_paided_to_first_scan_days`
+- [x] 6.3 Verify cả 2 queries qua MCP — Standard khớp v0.3 hoàn toàn; Platform counts khớp, pass_rate cao hơn +2–9% do formula thay đổi (expected)
+- [x] 6.4 Update CSV cache (v0.4)
+- [x] 6.5 Update `design.md` — D3 revised: unified fact source, bỏ join pattern cũ
+- [x] 6.6 Ghi `changelog.md` v0.4
+
+SQL sau refactor (simplified):
+
+```sql
+-- Standard: đơn GM mua label
+SELECT ... FROM gea__silver.fact_order_fulfillment_performance FINAL
+WHERE is_platform = 0
+  AND paid_at_utc >= toStartOfMonth(now() - INTERVAL 12 MONTH)
+  AND first_scan_day IS NOT NULL
+
+-- Platform: USPS label by customer
+SELECT ... FROM gea__silver.fact_order_fulfillment_performance FINAL
+WHERE is_platform = 1
+  AND paid_at_utc >= toStartOfMonth(now() - INTERVAL 12 MONTH)
+```
