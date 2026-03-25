@@ -39,8 +39,8 @@
 
 - `fact_order` — enriched orders (0 rows — empty)
 - `fact_order_event` — order events / CDC-style events (0 rows — empty)
-- `fact_order_fulfillment_performance` — fulfillment SLA per order (~1.73M rows) ⭐ — *+`is_platform` 2026-03-23*
-- `fact_order_fulfillment_performance_by_product` — fulfillment SLA per order+product (~1.5M rows) — *+`is_platform` 2026-03-23*
+- `fact_order_fulfillment_performance` — fulfillment SLA per order (~1.73M rows) ⭐ — *+`is_rush` 2026-03-25*
+- `fact_order_fulfillment_performance_by_product` — fulfillment SLA per order+product (~1.5M rows) — *+`is_rush` 2026-03-25*
 - `fact_order_line` — order line items (0 rows — empty, dùng `v__fact_order_line` thay thế)
 - `fact_production_order_sla_tracker` — live SLA tracker per order item (~1.9K rows)
 - `fact_production_order_sla_tracker_daily_snapshot` — daily snapshots of SLA (~270K rows)
@@ -475,6 +475,7 @@
 > **Cần FINAL khi query**
 > Fulfillment SLA tracking per order: paid → production → fulfilled → scanned → delivered
 > *2026-03-23: +`is_platform` (enrich-fact-ofp-platform); MV updated (join nh_order_source + COALESCE USPS tracking)*
+> *2026-03-25: +`is_rush` (enrich-fact-ofp-rush-order); MV updated (join nh_rush_order_data WHERE rush_status=1)*
 
 
 | Column                | Type                           | Ghi chú                                                                                                |
@@ -500,7 +501,8 @@
 | first_scan_day        | Nullable(Float32)              | **Tracking Lag** (fulfilled → first scan, **business days**) ⭐                                         |
 | shipping_day          | Nullable(Float32)              | Transit time (fulfilled → delivered, calendar days = shipping_hour/24) — **không phải paid→fulfilled** |
 | updated_at            | DateTime64(3,'UTC')            |                                                                                                        |
-| **is_platform**       | **UInt8**                      | **🆕 1 = Platform order (is_label=1 trong nh_order_source), 0 = Standard** ⭐                           |
+| **is_platform**       | **UInt8**                      | **1 = Platform order (is_label=1 trong nh_order_source), 0 = Standard** ⭐                              |
+| **is_rush**           | **UInt8**                      | **🆕 1 = Rush order (rush_status=1 trong nh_rush_order_data), 0 = Standard** ⭐                         |
 
 
 ---
@@ -511,6 +513,7 @@
 > **Cần FINAL khi query**
 > Same as fact_order_fulfillment_performance but granularity = order + product_type
 > *2026-03-23: +`is_platform` (enrich-fact-ofp-by-product); MV updated (join nh_order_source + COALESCE USPS tracking)*
+> *2026-03-25: +`is_rush` (enrich-fact-ofp-rush-order); MV updated (join nh_rush_order_data WHERE rush_status=1)*
 
 
 | Column                | Type                   | Ghi chú                                                    |
@@ -533,7 +536,8 @@
 | first_scan_day        | Nullable(Float32)      |                                                            |
 | shipping_day          | Nullable(Float32)      |                                                            |
 | updated_at            | DateTime64(3,'UTC')    | version key (ReplacingMergeTree)                           |
-| **is_platform**       | **UInt8**              | **🆕 1 = Platform order (is_label=1), 0 = Standard** ⭐    |
+| **is_platform**       | **UInt8**              | **1 = Platform order (is_label=1), 0 = Standard** ⭐       |
+| **is_rush**           | **UInt8**              | **🆕 1 = Rush order (rush_status=1), 0 = Standard** ⭐     |
 
 
 ---
