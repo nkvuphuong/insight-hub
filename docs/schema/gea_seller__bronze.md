@@ -758,25 +758,121 @@
 ## `gm_product` 🔵
 
 > Engine: SharedReplacingMergeTree | Rows: 175
-> Dùng `FINAL` khi query để dedup. Catalog sản phẩm Gearment.
+> Dùng `FINAL` khi query để dedup. Catalog sản phẩm Gearment (base product, không phải variant).
 
 | Column | Type | Ghi chú |
 |---|---|---|
-| `id` | Int64 | PK |
+| `id` | Int64 | PK nội bộ ClickHouse |
+| `product_id` | String | UUID — key chính |
+| `legacy_id` | Nullable(Int64) | |
+| `sku` | Nullable(String) | |
+| `name` | Nullable(String) | Tên sản phẩm |
+| `code` | Nullable(String) | |
+| `description` | Nullable(String) | |
+| `product_type_id` | Nullable(Int64) | FK -> gm_product_type.id |
+| `hs_code` | Nullable(String) | |
+| `price` | Nullable(Int64) | cents |
+| `min_price` | Nullable(Int64) | cents |
+| `status` | Nullable(Int16) | |
+| `display_status` | Nullable(Int16) | |
+| `display_order` | Nullable(Int64) | |
+| `short_url` | Nullable(String) | |
+| `avatar_url` | Nullable(String) | |
+| `print_template` | Nullable(String) | |
+| `is_featured` | Nullable(Bool) | |
+| `is_trending` | Nullable(Bool) | |
+| `is_recommend` | Nullable(Bool) | |
+| `is_new_arrival` | Nullable(Bool) | |
+| `is_website_catalog_listing_enabled` | Nullable(Bool) | |
+| `created_at` | DateTime64(6,'UTC') | |
+| `updated_at` | DateTime64(6,'UTC') | |
 | `_processed_at` | DateTime64(3,'UTC') | |
 | `_action` | String | |
 | `_timestamp` | DateTime64(3,'UTC') | |
-
-*(Xem file gm_ để biết đầy đủ columns — từ file toolu_016e9dDAGkKBiV1FsMuoXL35.txt)*
 
 ---
 
 ## `gm_product_variant` 🔵
 
 > Engine: SharedReplacingMergeTree | Rows: ~9.9K
-> Dùng `FINAL` khi query để dedup
+> Dùng `FINAL` khi query để dedup. Variants của Gearment catalog (color × size combinations).
 
-*(Columns: id, product_id, sku, name, options, price, status, created_at, updated_at, _processed_at, _action, _timestamp)*
+| Column | Type | Ghi chú |
+|---|---|---|
+| `id` | Int64 | PK nội bộ ClickHouse |
+| `variant_id` | String | UUID — key chính, FK từ sc_order_line_item.variant_id |
+| `product_id` | Nullable(String) | FK -> gm_product.product_id |
+| `legacy_id` | Nullable(Int64) | |
+| `variant_sku` | Nullable(String) | |
+| `gtin` | Nullable(String) | |
+| `hs_code` | Nullable(String) | |
+| `status` | Nullable(Int16) | |
+| `order_channel` | Nullable(Int16) | |
+| `name` | Nullable(String) | Tên variant (color + size) |
+| `description` | Nullable(String) | |
+| `option1` | Nullable(String) | Color value |
+| `option1_code` | Nullable(String) | Color code |
+| `option1_name` | Nullable(String) | Color display name |
+| `option2` | Nullable(String) | Size value |
+| `option2_code` | Nullable(String) | Size code — JOIN với gm_product_option.code WHERE type=2 |
+| `option2_name` | Nullable(String) | Size display name |
+| `option3` | Nullable(String) | |
+| `price` | Nullable(Int64) | cents |
+| `recommended_price` | Nullable(Int64) | cents |
+| `extra_price` | Nullable(Int64) | cents |
+| `stock_quantity` | Nullable(Int64) | |
+| `stock_label` | Nullable(String) | |
+| `weight` | Nullable(Int64) | |
+| `weight_unit` | Nullable(String) | |
+| `created_at` | String | |
+| `created_by` | Nullable(String) | |
+| `updated_at` | String | |
+| `updated_by` | Nullable(String) | |
+| `ts_token` | Nullable(String) | |
+| `_processed_at` | DateTime64(3,'UTC') | |
+| `_action` | String | |
+| `_timestamp` | DateTime64(3,'UTC') | |
+
+---
+
+## `gm_product_option` 🔵
+
+> Engine: SharedReplacingMergeTree | Rows: ~2.9K
+> Dùng `FINAL` khi query để dedup. Options của sản phẩm (size, color, v.v.).
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| `id` | Int64 | PK |
+| `product_id` | Nullable(String) | FK -> gm_product.product_id |
+| `type` | Nullable(Int16) | 1=color, 2=size — dùng `type=2` để lấy size option |
+| `name` | Nullable(String) | Tên option (vd: "S", "M", "L") |
+| `value` | Nullable(String) | |
+| `quantity` | Nullable(Int64) | Số đơn vị per option (vd: 1 shirt = 1 unit) |
+| `code` | Nullable(String) | Option code — JOIN với gm_product_variant.option2_code |
+| `is_default` | Nullable(Bool) | |
+| `is_featured` | Nullable(Bool) | |
+| `description` | Nullable(String) | |
+| `display_order` | Nullable(Int64) | |
+| `status` | Nullable(String) | |
+| `ts_token` | Nullable(String) | |
+| `_processed_at` | DateTime64(3,'UTC') | |
+| `_action` | String | |
+| `_timestamp` | DateTime64(3,'UTC') | |
+
+---
+
+## `gm_product_type` 🔵
+
+> Engine: SharedReplacingMergeTree | Rows: 42
+> Dùng `FINAL` khi query để dedup. Loại sản phẩm (Apparel, Sticker, Poster, Mug, ...).
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| `id` | Int64 | PK — FK từ gm_product.product_type_id |
+| `name` | Nullable(String) | Tên loại (Apparel / Sticker / Poster / Mug / ...) |
+| `_processed_at` | DateTime64(3,'UTC') | |
+| `_action` | String | |
+| `_timestamp` | DateTime64(3,'UTC') | |
 
 ---
 
@@ -790,7 +886,19 @@
 ## `gm_team_price_tier` 🔵
 
 > Engine: SharedReplacingMergeTree | Rows: ~34K
-> Dùng `FINAL` khi query để dedup. Price tiers theo team.
+> Dùng `FINAL` khi query để dedup. Price tier assignment theo team. Mỗi team có 1 active tier.
+
+| Column | Type | Ghi chú |
+|---|---|---|
+| `id` | Int64 | PK |
+| `team_id` | String | FK -> iam_team.team_id |
+| `tier_id` | Nullable(String) | sale_price=Bronze, price_5000=Silver, price_15000=Gold, price_30000=Platinum, price_50000=Diamond |
+| `created_at` | DateTime64(6,'UTC') | |
+| `updated_at` | DateTime64(6,'UTC') | |
+| `updated_by` | Nullable(String) | |
+| `_processed_at` | DateTime64(3,'UTC') | |
+| `_action` | String | |
+| `_timestamp` | DateTime64(3,'UTC') | |
 
 ---
 

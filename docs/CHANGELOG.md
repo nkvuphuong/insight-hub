@@ -34,6 +34,7 @@ Mục lục thay đổi toàn dự án. Mỗi entry = 1 dòng tóm tắt + link 
 - [2026-03-23] gea_silver: fix v_shipx_rate_comparison duplicate — SCD filter shipx phải ở WHERE, không ON → [gea_silver.md](./schema/gea_silver.md)
 - [2026-03-24] gea__silver: +is_platform vào fact_ofp + fact_ofp_by_product; +8 tables mới (dict/dim); fact_order_v1/v3 không còn tồn tại → [gea__silver.md](./schema/gea__silver.md)
 - [2026-03-25] gea__silver: +is_rush vào fact_ofp + fact_ofp_by_product; MV updated (join nh_rush_order_data) → [gea__silver.md](./schema/gea__silver.md)
+- [2026-03-26] gea_seller__bronze: expand 4 bảng gm_ còn thiếu columns (product, product_variant, product_option, product_type, team_price_tier) → [gea_seller__bronze.md](./schema/gea_seller__bronze.md)
 
 ### Reports
 - [2026-03-24] ops-sla-drilldown: poc-done (v0.1) — 4 charts, drill-down L1→L4, HB1/HB2 production bottleneck confirmed → [changelog](../reports/ops-sla-drilldown/changelog.md)
