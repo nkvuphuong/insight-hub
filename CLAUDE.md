@@ -137,6 +137,15 @@ reports/
 │           ├── proposal.md        # What & why — audience, scope, gates
 │           ├── design.md          # Technical spec — metrics, SQL, caveats ⭐ đọc trước khi viết SQL
 │           └── tasks.md           # Next steps theo lifecycle gates
+├── adhoc/                         # Yêu cầu ad-hoc từ CS/BD — one-off, không recurring
+│   ├── _template/                 # Template cho request mới
+│   │   ├── request.md             # Ai yêu cầu, deadline, mô tả
+│   │   └── query.sql              # SQL template + common patterns
+│   ├── .gitignore                 # Ignore output/ (chứa data khách hàng)
+│   └── YYYY-MM-DD-<name>/        # Mỗi request 1 folder, date prefix
+│       ├── request.md             # Context yêu cầu
+│       ├── query.sql              # Query chính
+│       └── output/                # CSV/Excel export (gitignored)
 └── reports/                       # Tất cả báo cáo — 1 subfolder per báo cáo
     └── <report-name>/             # kebab-case
         ├── changelog.md           # Changelog của báo cáo này
@@ -246,6 +255,24 @@ Nếu tạo thủ công:
 4. Điền `openspec/changes/<name>/tasks.md` — checklist theo lifecycle gates
 5. Tạo `reports/<name>/` với: `queries/`, `changelog.md`, `poc.ipynb` (copy từ `_templates/poc_template.ipynb`)
 6. **Cập nhật bảng "Danh Sách Báo Cáo" trong file CLAUDE.md này**
+
+### Khi xử lý yêu cầu ad-hoc (CS/BD)
+
+> Yêu cầu one-off từ CS/BD: export data cho khách hàng cụ thể, list top customers, v.v.
+> Không cần OpenSpec flow. Ưu tiên tốc độ.
+
+1. Tạo folder `adhoc/YYYY-MM-DD-<tên-ngắn>/` (copy từ `adhoc/_template/`)
+2. Điền `request.md` — paste message gốc, ghi rõ ai yêu cầu + deadline
+3. Viết query trong `query.sql`, verify qua MCP
+4. Export CSV vào `output/` (gitignored — chứa data khách hàng)
+5. Gửi file cho người yêu cầu
+
+**Lookup patterns phổ biến** (xem thêm trong `adhoc/_template/query.sql`):
+- Customer OMS: `geadb__bronze.nh_customer` (cus_id, cus_email)
+- Seller POD: `gea_iam__bronze.iam_user` (gm_email → default_team_id)
+- Orders OMS → fact table: `nh_order.cus_id` → `fact_order_fulfillment_performance.order_id`
+- Orders POD: `gea_seller__bronze.sc_order` (team_id)
+- Shipping service: `gea_seller__bronze.sc_order_shipment` (tracking_service, carrier_service)
 
 ### Khi viết SQL
 

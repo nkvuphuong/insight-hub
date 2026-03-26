@@ -1,0 +1,26 @@
+-- Ad-hoc query template
+-- Request: [tên yêu cầu]
+-- Date: [YYYY-MM-DD]
+--
+-- Common patterns:
+--
+-- 1. Tìm customer/seller:
+--    SELECT cus_id, cus_email FROM geadb__bronze.nh_customer WHERE position(lower(cus_email), 'keyword') > 0
+--    SELECT id, user_id, gm_email, default_team_id FROM gea_iam__bronze.iam_user FINAL WHERE lower(gm_email) LIKE '%keyword%'
+--
+-- 2. Orders của customer (OMS):
+--    SELECT * FROM geadb__bronze.nh_order WHERE cus_id = {cus_id}
+--
+-- 3. Orders của seller (POD):
+--    SELECT * FROM gea_seller__bronze.sc_order FINAL WHERE team_id = '{team_id}'
+--
+-- 4. Join fact table (có processing_day, shipping_day):
+--    SELECT f.* FROM gea__silver.fact_order_fulfillment_performance f
+--    WHERE f.order_id IN (SELECT ord_id FROM geadb__bronze.nh_order WHERE cus_id = {cus_id})
+--
+-- 5. Shipping service (POD side):
+--    SELECT tracking_service, carrier_service, service_display
+--    FROM gea_seller__bronze.sc_order_shipment FINAL WHERE team_id = '{team_id}'
+
+-- === Query chính ===
+
