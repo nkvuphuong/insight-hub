@@ -1,7 +1,7 @@
 -- =============================================================
 -- Q2: Processing time by month
 -- Customer: dopeskill — touch@dopeskillbrand.com
--- Period:   Q4 2025 (Oct–Dec) + Q1 2026 (Jan–Mar, tính đến hiện tại)
+-- Period:   Q1 2026 (Jan–Mar)
 -- =============================================================
 --
 -- Data model:
@@ -25,14 +25,16 @@
 SELECT
     formatDateTime(toStartOfMonth(pf.paid_at_utc), '%Y-%m') AS payment_month,
     count(DISTINCT pf.order_id)                              AS orders,
+    round(min(pf.processing_day), 2)                         AS min_processing_day,
     round(avg(pf.processing_day), 2)                         AS avg_processing_day,
     round(median(pf.processing_day), 2)                      AS median_processing_day,
-    round(min(pf.processing_day), 2)                         AS min_processing_day,
+    round(quantile(0.90)(pf.processing_day), 2)              AS p90_processing_day,
+    round(quantile(0.95)(pf.processing_day), 2)              AS p95_processing_day,
     round(max(pf.processing_day), 2)                         AS max_processing_day
 FROM gea__silver.fact_order_fulfillment_performance AS pf
 INNER JOIN geadb__bronze.nh_order AS o                   ON toInt64(pf.order_id) = o.ord_id
 LEFT JOIN  gea_seller__bronze.sc_fulfillment_order AS fo ON o.ord_id = toInt32(fo.vendor_ref)
-WHERE pf.paid_at_utc >= '2025-10-01'
+WHERE pf.paid_at_utc >= '2026-01-01'
   AND pf.paid_at_utc  < '2026-04-01'
   AND pf.processing_day >= 0
   AND (o.cus_id = 11677 OR fo.team_id = '0Px0QS0P3YI')
