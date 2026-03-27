@@ -266,6 +266,7 @@ Nếu tạo thủ công:
 3. Viết query trong `query.sql`, verify qua MCP
 4. Export CSV vào `output/` (gitignored — chứa data khách hàng)
 5. Gửi file cho người yêu cầu
+6. **Cập nhật `adhoc/REPORT.md`** — thêm 1 dòng vào Request Log + cập nhật Summary counts + đánh giá recurring candidate nếu có pattern mới
 
 **Lookup patterns phổ biến** (xem thêm trong `adhoc/_template/query.sql`):
 - Customer OMS: `geadb__bronze.nh_customer` (cus_id, cus_email)
