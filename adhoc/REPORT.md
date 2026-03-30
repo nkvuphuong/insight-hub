@@ -10,7 +10,7 @@ Dùng để phân tích nhu cầu, tần suất lặp lại, và xác định ca
 
 | Metric           | Value   |
 | ---------------- | ------- |
-| Tổng số requests | 3       |
+| Tổng số requests | 4       |
 | Requesters       | CS, BD  |
 | Period           | 2026-03 |
 
@@ -25,6 +25,7 @@ Dùng để phân tích nhu cầu, tần suất lặp lại, và xác định ca
 | 2026-03-26 | BI-787 | [2026-03-26-dopeskill-report](./2026-03-26-dopeskill-report/) | CS        | CS      | Export report vol + processing + shipping time cho khách Dopeskill                               | V1+V3 (nh_order + sc_order), fact_ofp           | PDF summary + CSV | Done        |
 | 2026-03-26 | BI-789 | [2026-03-26-tier-vol-report](./2026-03-26-tier-vol-report/)   | CS, BD    | CS / BD | Danh sách sellers theo tier (Gold/Platinum/Diamond) + vol by product type cho promotion outreach | sc_order + gm_product_type + gm_team_price_tier | CSV               | In progress |
 | 2026-03-26 | BI-786 | [2026-03-26-top-mug-sellers](./2026-03-26-top-mug-sellers/)   | CS, BD    | CS / BD | Top 10 sellers theo mug volume — 2024 vs 2025, làm cơ sở offer giá enterprise                    | V1+V3 (nh_order + sc_order), gm_product_type    | CSV               | Done        |
+| 2026-03-30 | BI-791 | [2026-03-30-replace-refund-tickets](./2026-03-30-replace-refund-tickets/) | Phương | CS | Export raw list ticket replace/refund 6 tháng (Oct 2025–Mar 2026) theo lý do | nh_order + nh_order_refund + nh_order_extra | CSV | In progress |
 
 
 ---
