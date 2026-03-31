@@ -133,10 +133,14 @@ reports/
 ├── openspec/
 │   ├── config.yaml                # Project context + rules cho OpenSpec
 │   └── changes/
-│       └── <report-name>/
-│           ├── proposal.md        # What & why — audience, scope, gates
-│           ├── design.md          # Technical spec — metrics, SQL, caveats ⭐ đọc trước khi viết SQL
-│           └── tasks.md           # Next steps theo lifecycle gates
+│       ├── <report-name>/
+│       │   ├── proposal.md        # What & why — audience, scope, gates
+│       │   ├── design.md          # Technical decisions + SQL approach (⭐ đọc trước viết SQL)
+│       │   ├── tasks.md           # Next steps theo lifecycle gates
+│       │   └── specs/             # Capability requirements (formal spec per capability)
+│       │       └── <capability>.md
+│       └── archive/               # Completed changes (keep for reference)
+│           └── <date-name>/       # Full artifacts maintained
 ├── adhoc/                         # Yêu cầu ad-hoc từ CS/BD — one-off, không recurring
 │   ├── _template/                 # Template cho request mới
 │   │   ├── request.md             # Ai yêu cầu, deadline, mô tả
@@ -260,13 +264,16 @@ SELECT * FROM base ORDER BY month
 
 ### Khi làm việc với báo cáo hiện có
 
-1. Đọc `openspec/changes/<name>/design.md` — source of truth cho metrics, SQL, filters, caveats
+1. Đọc `openspec/changes/<name>/design.md` — technical decisions, metrics, SQL approach, caveats
    - Nếu change đã archive: đọc từ `openspec/archive/<name>/design.md`
-2. Đọc `openspec/changes/<name>/tasks.md` — xác định next steps và gate hiện tại
-3. Không nhảy cóc gate — cần Phuong confirm trước khi tiếp
-4. Chạy SQL qua MCP để verify trước khi lưu vào `reports/<name>/queries/`
-5. Ghi lại mọi thay đổi vào `reports/<name>/changelog.md`
-6. Ghi entry tương ứng vào `docs/CHANGELOG.md`
+2. Nếu cần formal requirement definition: đọc `openspec/changes/<name>/specs/<capability>.md`
+   - **Distinction:** design.md = implementation decisions (D1, D2, ...); specs/ = capability requirements (SHALL, scenarios)
+   - Nhiều change không cần specs/ — chỉ khi có formal requirement docs cần separate từ design
+3. Đọc `openspec/changes/<name>/tasks.md` — xác định next steps và gate hiện tại
+4. Không nhảy cóc gate — cần Phuong confirm trước khi tiếp
+5. Chạy SQL qua MCP để verify trước khi lưu vào `reports/<name>/queries/`
+6. Ghi lại mọi thay đổi vào `reports/<name>/changelog.md`
+7. Ghi entry tương ứng vào `docs/CHANGELOG.md`
 
 ### Khi tạo báo cáo mới
 

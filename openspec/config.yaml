@@ -32,13 +32,24 @@ context: |
   Python NEVER: filter, join, aggregate, transform. Metabase runs pure SQL.
 
 rules:
+  change-structure:
+    - Each change MUST have: proposal.md, design.md, tasks.md (only)
+    - Capability specs defined in specs/ subfolder (scoped to change) — NO global /specs/ library
+    - Archived changes: keep in /changes/archive/<date-name>/ with full artifacts
   proposal:
     - Include: requestor, business audience, key question being answered, success criteria
     - Include gate: biz-validated questions (who reads, SLA target, action owner, escalation workflow)
   design:
     - Include SQL approach: which tables, join paths, metric formulas, edge case handling
+    - Include technical decisions (D1, D2, D3...) — implementation approach notes
     - Include data quality caveats specific to this dataset
     - Reference docs/schema/<db>.md for column names
+    - Avoid duplication: don't paste capability requirements (those go in specs/)
+  specs:
+    - Location: ONLY at changes/<name>/specs/<capability>.md
+    - Content: formal capability requirements (SHALL, scenarios, output schema)
+    - Purpose: requirements reference during implementation, separate from design.md decisions
+    - Pattern: one .md per capability (e.g. sla-compliance-overview.md, sla-trend.md)
   tasks:
     - Tasks must follow lifecycle gates in order
     - Each gate requires Phuong confirmation before next task starts
