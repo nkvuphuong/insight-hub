@@ -285,19 +285,100 @@ Nếu tạo thủ công:
 > Yêu cầu one-off từ CS/BD: export data cho khách hàng cụ thể, list top customers, v.v.
 > Không cần OpenSpec flow. Ưu tiên tốc độ.
 
-1. Tạo folder `adhoc/YYYY-MM-DD-<tên-ngắn>/` (copy từ `adhoc/_template/`)
-2. Điền `request.md` — paste message gốc, ghi rõ ai yêu cầu + deadline
-3. Viết query trong `query.sql`, verify qua MCP
-4. Export CSV vào `output/` (gitignored — chứa data khách hàng)
-5. Gửi file cho người yêu cầu
-6. **Cập nhật `adhoc/REPORT.md`** — thêm 1 dòng vào Request Log + cập nhật Summary counts + đánh giá recurring candidate nếu có pattern mới
+#### Step 0 — Xác định scope từ ClickUp task
+1. Đọc ClickUp task description → requester, deadline, exact ask
+2. Confirm output format: **CSV / Excel / PDF?** (trả lời requester nếu không rõ)
+3. Estimate: "Bao lâu xong?" để set expectation
 
-**Lookup patterns phổ biến** (xem thêm trong `adhoc/_template/query.sql`):
-- Customer OMS: `geadb__bronze.nh_customer` (cus_id, cus_email)
-- Seller POD: `gea_iam__bronze.iam_user` (gm_email → default_team_id)
-- Orders OMS → fact table: `nh_order.cus_id` → `fact_order_fulfillment_performance.order_id`
-- Orders POD: `gea_seller__bronze.sc_order` (team_id)
-- Shipping service: `gea_seller__bronze.sc_order_shipment` (tracking_service, carrier_service)
+#### Step 1–6 — Thực hiện
+1. Tạo folder `adhoc/YYYY-MM-DD-<tên-ngắn>/` (copy từ `adhoc/_template/`)
+2. Điền `request.md` — paste message gốc, ghi scope + data source + output columns (xem template)
+3. Viết query:
+   - **Single query:** `query.sql` (nếu báo cáo nhỏ, ~50 lines)
+   - **Multi-query:** `q1_name.sql`, `q2_name.sql`, `q3_*.sql` (nếu báo cáo lớn có nhiều phần, ví dụ BI-787 có 4 queries)
+4. Verify query qua MCP (`run_select_query`) trước khi save
+5. **Export output:**
+   - **CSV:** Trực tiếp từ MCP query result hoặc `pandas.to_csv()`
+   - **Excel:** Dùng `openpyxl` + `export.py` nếu cần formatting/pivot (ví dụ BI-792)
+   - **PDF:** Matplotlib figure nếu cần visualize
+6. Gửi file cho người yêu cầu
+7. **Cập nhật `adhoc/REPORT.md`** — thêm 1 dòng vào Request Log + update Summary counts + đánh giá recurring candidate
+
+#### Step 7 — Sync & Commit
+1. **Task description update:** Copy request.md scope + data source → ClickUp task description
+2. **Technical comment:** Add comment với queries + join paths + key notes
+3. **Commit message:**
+   ```
+   feat(adhoc): BI-XXX <tên-báo-cáo> — <tóm-tắt>
+
+   - Details of what was implemented
+   - Key technical notes if any
+
+   Co-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>
+   ```
+   Ví dụ: `feat(adhoc): BI-792 processing time report — duynguyen02169 Q1/2026, pivot summary + detail list`
+4. **ARCHIVE.md:** Add 1-line entry: `| BI-XXX | Task | Requester | Done | 2026-03-31 | [link](url) | Notes |`
+
+#### Common join paths for ad-hoc
+
+**OMS orders + fulfillment:**
+```
+geadb__bronze.nh_order (order_id, cus_id, seller_id, ord_time)
+  ↓ (optional enrichment)
+geadb__bronze.nh_customer (cus_id → seller_email)
+  ↓ (for metrics)
+gea__silver.fact_order_fulfillment_performance_by_product FINAL (order_id)
+```
+
+**POD orders + fulfillment:**
+```
+gea__silver.fact_order_line_v3 (order_id, seller_email, product_type)
+  ↓ (for metrics)
+gea__silver.fact_order_fulfillment_performance_by_product FINAL (order_id, toUInt64 cast)
+```
+
+**Seller-specific reports (V1+V3 unified):**
+```
+WITH seller_orders AS (
+    SELECT DISTINCT toUInt64(order_id) FROM gea__silver.fact_order_line_v1 WHERE seller_email = '...'
+    UNION DISTINCT
+    SELECT DISTINCT toUInt64(order_id) FROM gea__silver.fact_order_line_v3 WHERE seller_email = '...'
+)
+SELECT ... FROM seller_orders
+INNER JOIN gea__silver.fact_order_fulfillment_performance_by_product FINAL ON ...
+```
+**Note:** Type cast `toUInt64()` vì fact_order_line.order_id là Int64, fact table là UInt64
+
+**Tier/Product classification (POD):**
+```
+gea_seller__bronze.gm_team_price_tier FINAL (tier_id, team_id)
+  ↓
+gea_seller__bronze.sc_order (team_id)
+  ↓
+sc_order_line_item (item_quantity, variant_name → product type)
+  ↓ (join to gm_product for structured type)
+gm_product → gm_product_type (product_type_id)
+```
+
+#### ClickHouse-specific (critical for ad-hoc)
+
+- **FINAL keyword:** Bắt buộc cho ReplacingMergeTree/CollapsingMergeTree tables (`nh_order`, `nh_order_refund`, `nh_order_extra`, `gm_team_price_tier`)
+- **Nullable DateTime filter:** Dùng `toDate(col) >= '2026-01-01'` NOT `col >= toDateTime('2026-01-01', 'UTC')` trên `Nullable(DateTime('UTC'))` columns — implicit cast sẽ fail âm thầm
+- **Type casting in JOIN:** Explicit `toUInt64()` / `toInt64()` trước khi JOIN — không rely implicit conversion (ví dụ fact_order_line.order_id: Int64 → fact_ofp.order_id: UInt64)
+- **Timeout:** Query phức tạp (nhiều FINAL + JOIN bảng >1M rows) → set `timeoutSeconds = 300` (default 120s)
+- **"completed with no output" ambiguity:** = 0 rows HOẶC timeout âm thầm, không phân biệt. Verify bằng `SELECT count(*) FROM table WHERE filter` trước khi kết luận "no data"
+- **MCP token expiration:** Nếu gặp lỗi auth mid-session → dùng `/mcp` command để re-auth
+
+#### Common patterns / lookup table
+
+| Scenario | Tables | Join Key | Type Note |
+|---|---|---|---|
+| Get seller email from order | `nh_order` → `nh_customer` | cus_id | OMS customer |
+| Get seller email from POD order | `sc_order` → `iam_user` (via team_id) | team_id → default_team_id | POD team lookup |
+| Get fulfillment metrics | `fact_order_fulfillment_performance_by_product FINAL` | order_id | Requires FINAL |
+| Filter by product type | `sc_order_line_item` → variant_name pattern OR `gm_product_type` | variant_name ILIKE OR product_type_id | Prefer explicit join to gm_product_type |
+| Get tier assignment | `gm_team_price_tier FINAL` | team_id → tier_id | Requires FINAL |
+| Get shipping service | `sc_order_shipment` | order_id | Nullable columns — handle NULL |
 
 ### Khi ad-hoc request hoàn thành — Sync & Archive
 
@@ -325,7 +406,9 @@ Nếu tạo thủ công:
 > "Chúng ta có bao giờ làm report processing time cho seller nào không?"
 - Mở `adhoc/ARCHIVE.md` → grep "processing time" → tìm thấy BI-792 → click ClickUp → xem scope + queries → adapt cho request mới
 
-### Khi viết SQL
+### Khi viết SQL — Recurring Reports (OpenSpec flow)
+
+> Dành cho báo cáo recurring (trong `reports/`), không phải ad-hoc.
 
 1. **Đọc `openspec/changes/<name>/design.md`** — xác định table, columns, metric formulas, filters, caveats
 2. **Đọc `docs/schema.md`** — xác định database nào cần dùng
@@ -337,6 +420,8 @@ Nếu tạo thủ công:
 8. Chú ý ClickHouse-specific syntax (xem mục Quy Ước SQL bên trên)
 9. Verify qua MCP (`run_select_query`) trước khi lưu file
 10. **Nếu dùng join path mới chưa có trong `docs/data-map.md`** → cập nhật Section 3 sau khi verify thành công
+
+**Khác với ad-hoc:** Recurring reports có design.md spec → follow exact metrics, không tự sáng tạo logic.
 
 ### Khi explore / refresh schema một database
 
