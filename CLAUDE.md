@@ -178,6 +178,30 @@ reports/
 - CTE dùng `WITH ... AS (SELECT ...)` — standard, không dùng temp table
 - **JOIN type mismatch**: ClickHouse không tự cast signed/unsigned trong JOIN ON — luôn kiểm tra type của join key ở cả 2 bảng trước khi viết JOIN, cast tường minh nếu khác type (ví dụ: `toInt64(ord_id)` khi join Int64 với UInt64)
 - **Test CTE trước khi tạo MV**: trước khi chạy `CREATE MATERIALIZED VIEW`, copy phần `AS (SELECT ...)` ra chạy thử standalone để đảm bảo không có lỗi syntax hay type — tránh trường hợp DROP xong mới phát hiện lỗi
+- **Nullable DateTime filter**: filter trên `Nullable(DateTime('UTC'))` column bằng `toDate(col) >= '...'` — **không** dùng `col >= toDateTime('...', 'UTC')` vì implicit cast fail âm thầm trả về 0 rows
+
+### MCP ClickHouse — Debug Protocol
+
+`"completed with no output"` từ MCP có nghĩa là **0 rows HOẶC timeout âm thầm** — không phân biệt được từ response. Luôn verify trước khi kết luận.
+
+**Khi gặp "no output" trên query phức tạp:**
+
+1. **Verify từng nguồn riêng** — test filter trên từng bảng độc lập trước khi UNION/JOIN:
+   ```sql
+   SELECT count() FROM table_v1 WHERE seller_email = '...' -- có data không?
+   SELECT count() FROM table_v3 WHERE seller_email = '...' -- có data không?
+   ```
+
+2. **Verify join key khớp** — lấy vài IDs từ source rồi check thủ công trong target:
+   ```sql
+   SELECT DISTINCT order_id FROM source_table WHERE ... LIMIT 5
+   -- rồi:
+   SELECT * FROM fact_table WHERE order_id IN (id1, id2, id3)
+   ```
+
+3. **Tăng timeout** cho query nhiều FINAL + JOIN trên bảng >1M rows: dùng `timeoutSeconds = 300`
+
+4. **Kết luận "no data" chỉ khi** `SELECT count()` trên bảng gốc với filter đơn giản trả về 0
 
 ### Patterns
 

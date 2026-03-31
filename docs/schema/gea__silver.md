@@ -42,6 +42,8 @@
 - `fact_order_fulfillment_performance` — fulfillment SLA per order (~1.73M rows) ⭐ — *+`is_rush` 2026-03-25*
 - `fact_order_fulfillment_performance_by_product` — fulfillment SLA per order+product (~1.5M rows) — *+`is_rush` 2026-03-25*
 - `fact_order_line` — order line items (0 rows — empty, dùng `v__fact_order_line` thay thế)
+- `fact_order_line_v1` — order line items V1 system (item_id: Int64) ⭐
+- `fact_order_line_v3` — order line items V3 system (item_id: String) ⭐
 - `fact_production_order_sla_tracker` — live SLA tracker per order item (~1.9K rows)
 - `fact_production_order_sla_tracker_daily_snapshot` — daily snapshots of SLA (~270K rows)
 
@@ -602,6 +604,108 @@
 | item_variant_id       | Nullable(Int64)         |                            |
 | source_system         | String                  | 'v1'/'v3'                  |
 | _processed_at         | DateTime64(3,'UTC')     |                            |
+
+
+---
+
+### `fact_order_line_v1` 🔄 ⭐
+
+> Engine: SharedReplacingMergeTree
+> **Cần FINAL khi query**
+> Order line items — V1 system (item_id là Int64)
+
+> Join to fact_order_fulfillment_performance_by_product: `toUInt64(order_id) = fofp.order_id` (Int64 → UInt64 cast required)
+
+
+| Column                | Type                        | Ghi chú                             |
+| --------------------- | --------------------------- | ----------------------------------- |
+| **order_id**          | **Int64**                   | **FK → nh_order** ⭐                 |
+| online_id             | Nullable(String)            | online order ID                     |
+| item_id               | Int64                       | PK = item ID (V1 Int64)             |
+| order_status          | Nullable(String)            |                                     |
+| order_payment_status  | Nullable(String)            |                                     |
+| order_payment_method  | Int16                       |                                     |
+| seller_id             | Nullable(String)            |                                     |
+| legacy_id             | Nullable(String)            |                                     |
+| **seller_email**      | **Nullable(String)**        | **seller email** ⭐                  |
+| team_id               | String                      | team ID                             |
+| store_id              | String                      | store ID                            |
+| campaign_id           | Int64                       | FK → campaign                       |
+| platform_name         | String                      | platform name                       |
+| **payment_date_utc**  | **Nullable(DateTime('UTC'))** | **payment datetime UTC** ⭐        |
+| order_time            | DateTime                    | order created time                  |
+| order_date            | Date                        | order date                          |
+| order_month           | String                      | 'YYYY-MM'                           |
+| order_type            | String                      | order type label                    |
+| fulfill_location      | String                      | fulfill location                    |
+| fulfill_timezone      | String                      |                                     |
+| tracking_number       | Nullable(String)            |                                     |
+| item_price            | Decimal(18,2)               | item selling price                  |
+| **item_quantity**     | **Int64**                   | **quantity** ⭐                      |
+| item_fee_shipping     | Decimal(18,2)               |                                     |
+| item_tax_total        | Decimal(18,2)               |                                     |
+| item_fee_total        | Decimal(18,2)               |                                     |
+| item_subtotal         | Decimal(18,2)               |                                     |
+| **item_total**        | **Decimal(18,2)**           | **item total revenue** ⭐            |
+| item_time             | DateTime                    |                                     |
+| **product_type**      | **String**                  | **product type** ⭐                  |
+| product               | String                      | product name                        |
+| product_sku           | String                      | SKU                                 |
+| item_name             | Nullable(String)            |                                     |
+| variant_sku           | String                      | variant SKU                         |
+| **source_system**     | **String**                  | **'v1' / 'v3'** ⭐                   |
+| _processed_at         | DateTime64(3)               |                                     |
+
+
+---
+
+### `fact_order_line_v3` 🔄 ⭐
+
+> Engine: SharedReplacingMergeTree
+> **Cần FINAL khi query**
+> Order line items — V3 system (item_id là String)
+
+> Join to fact_order_fulfillment_performance_by_product: `toUInt64(order_id) = fofp.order_id` (Int64 → UInt64 cast required)
+
+
+| Column                | Type                        | Ghi chú                             |
+| --------------------- | --------------------------- | ----------------------------------- |
+| **order_id**          | **Int64**                   | **FK → nh_order** ⭐                 |
+| online_id             | Nullable(String)            | online order ID                     |
+| item_id               | String                      | PK = item ID (V3 String)            |
+| order_status          | Nullable(String)            |                                     |
+| order_payment_status  | Nullable(String)            |                                     |
+| order_payment_method  | Int16                       |                                     |
+| seller_id             | Nullable(String)            |                                     |
+| legacy_id             | Nullable(String)            |                                     |
+| **seller_email**      | **Nullable(String)**        | **seller email** ⭐                  |
+| team_id               | String                      | team ID                             |
+| store_id              | String                      | store ID                            |
+| campaign_id           | Int64                       | FK → campaign                       |
+| platform_name         | String                      | platform name                       |
+| **payment_date_utc**  | **Nullable(DateTime('UTC'))** | **payment datetime UTC** ⭐        |
+| order_time            | DateTime                    | order created time                  |
+| order_date            | Date                        | order date                          |
+| order_month           | String                      | 'YYYY-MM'                           |
+| order_type            | String                      | order type label                    |
+| fulfill_location      | String                      | fulfill location                    |
+| fulfill_timezone      | String                      |                                     |
+| tracking_number       | Nullable(String)            |                                     |
+| item_price            | Decimal(18,2)               | item selling price                  |
+| **item_quantity**     | **Int64**                   | **quantity** ⭐                      |
+| item_fee_shipping     | Decimal(18,2)               |                                     |
+| item_tax_total        | Decimal(18,2)               |                                     |
+| item_fee_total        | Decimal(18,2)               |                                     |
+| item_subtotal         | Decimal(18,2)               |                                     |
+| **item_total**        | **Decimal(18,2)**           | **item total revenue** ⭐            |
+| item_time             | DateTime                    |                                     |
+| **product_type**      | **String**                  | **product type** ⭐                  |
+| product               | String                      | product name                        |
+| product_sku           | String                      | SKU                                 |
+| item_name             | Nullable(String)            |                                     |
+| variant_sku           | String                      | variant SKU                         |
+| **source_system**     | **String**                  | **'v1' / 'v3'** ⭐                   |
+| _processed_at         | DateTime64(3)               |                                     |
 
 
 ---
