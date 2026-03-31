@@ -299,6 +299,32 @@ Nếu tạo thủ công:
 - Orders POD: `gea_seller__bronze.sc_order` (team_id)
 - Shipping service: `gea_seller__bronze.sc_order_shipment` (tracking_service, carrier_service)
 
+### Khi ad-hoc request hoàn thành — Sync & Archive
+
+> Giải pháp duy trì traceability mà không phải quay lại git khi cần lookup sau này.
+
+**Bước 1 — Sync request details lên ClickUp:**
+- Cập nhật task description = `request.md` scope + data source (đầy đủ)
+- Tạo comment = technical implementation summary (queries, join paths, key notes)
+- Add tag `synced-to-clickup` (nếu có)
+
+**Bước 2 — Update `adhoc/ARCHIVE.md`:**
+- Thêm 1 dòng vào bảng tương ứng quarter (Q1, Q2, v.v.)
+- Columns: ID | Task | Requester | Status | Completion date | ClickUp link | Notes
+
+**Bước 3 — Optional git cleanup (storage):**
+- Nếu folder ad-hoc > 10 request/quarter → move sang `adhoc/archive/YYYY-QN/` (backup)
+- **Cảnh báo:** KHÔNG xóa output/ chứa data khách hàng — lưu ở external storage nếu cần
+
+**Lợi ích:**
+- **Source of truth:** ClickUp = description + comments (tất cả context)
+- **Quick lookup:** ARCHIVE.md index → ClickUp link → full details (AI agent friendly)
+- **Repo clean:** Git chỉ giữ template + summary, không chứa data chi tiết
+
+**Ví dụ khi tra cứu sau này:**
+> "Chúng ta có bao giờ làm report processing time cho seller nào không?"
+- Mở `adhoc/ARCHIVE.md` → grep "processing time" → tìm thấy BI-792 → click ClickUp → xem scope + queries → adapt cho request mới
+
 ### Khi viết SQL
 
 1. **Đọc `openspec/changes/<name>/design.md`** — xác định table, columns, metric formulas, filters, caveats
