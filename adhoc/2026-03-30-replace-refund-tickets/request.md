@@ -8,7 +8,7 @@
 | **Requester** | Phương (CS) |
 | **Priority** | High |
 | **Due** | 2026-03-30 |
-| **Status** | In progress |
+| **Status** | Done |
 
 ## Mô tả yêu cầu gốc
 
